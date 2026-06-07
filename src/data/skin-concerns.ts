@@ -1,0 +1,58 @@
+import type { SkinConcern } from "@/types";
+
+export const skinConcerns: SkinConcern[] = [
+  {
+    id: "sc1",
+    name: "Dryness",
+    slug: "dryness",
+    description: "Deep hydration for thirsty skin",
+    icon: "droplets",
+    imageGradient: "from-rose-50 to-beige-100",
+    productCount: 34,
+  },
+  {
+    id: "sc2",
+    name: "Dullness",
+    slug: "dullness",
+    description: "Restore your natural glow",
+    icon: "sparkles",
+    imageGradient: "from-beige-100 to-nude-100",
+    productCount: 28,
+  },
+  {
+    id: "sc3",
+    name: "Dark Spots",
+    slug: "dark-spots",
+    description: "Even tone brightening care",
+    icon: "sun",
+    imageGradient: "from-nude-100 to-rose-50",
+    productCount: 22,
+  },
+  {
+    id: "sc4",
+    name: "Sensitivity",
+    slug: "sensitivity",
+    description: "Calm, soothe & protect",
+    icon: "heart",
+    imageGradient: "from-pink-50 to-white",
+    productCount: 26,
+  },
+  {
+    id: "sc5",
+    name: "Acne & Blemishes",
+    slug: "acne",
+    description: "Clear skin without stripping",
+    icon: "shield",
+    imageGradient: "from-rose-100 to-beige-50",
+    productCount: 30,
+  },
+  {
+    id: "sc6",
+    name: "Aging",
+    slug: "aging",
+    description: "Firm, smooth & youthful skin",
+    icon: "moon",
+    imageGradient: "from-beige-200 to-nude-100",
+    productCount: 24,
+  },
+];

@@ -12,25 +12,25 @@ export function HeroSection() {
       <div className="pointer-events-none absolute -right-20 -top-20 size-80 rounded-full bg-rose-100/60 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-32 -left-20 size-96 rounded-full bg-nude-100/50 blur-3xl" />
 
-      <Container as="div" className="relative py-16 sm:py-20 lg:py-28">
-        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-          <div className="space-y-6 text-center lg:text-left">
+      <Container as="div" className="relative py-12 sm:py-16 lg:py-24">
+        <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-14">
+          <div className="space-y-5 text-center sm:space-y-6 lg:text-left">
             <Badge
               variant="secondary"
-              className="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-foreground backdrop-blur-sm"
+              className="rounded-full border-0 bg-white/80 px-3 py-1 text-xs font-medium text-foreground shadow-sm backdrop-blur-sm"
             >
               <Sparkles className="size-3" />
               Spring Collection 2026
             </Badge>
 
-            <h1 className="font-heading text-4xl font-medium leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              Discover your
-              <span className="block text-primary"> natural radiance</span>
+            <h1 className="font-heading text-3xl font-medium leading-[1.15] tracking-tight text-foreground sm:text-4xl lg:text-5xl xl:text-6xl">
+              Where luxury meets
+              <span className="block text-primary"> everyday radiance</span>
             </h1>
 
-            <p className="mx-auto max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg lg:mx-0">
-              Premium skincare, makeup, and fragrances curated for luminous skin
-              and effortless beauty. Crafted with care, delivered to your door.
+            <p className="mx-auto max-w-md text-sm leading-relaxed text-muted-foreground sm:max-w-lg sm:text-base lg:mx-0 lg:text-lg">
+              Premium skincare, makeup, and fragrances — thoughtfully curated for
+              skin that glows and confidence that lasts.
             </p>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
@@ -38,56 +38,58 @@ export function HeroSection() {
                 href="/shop"
                 className={cn(
                   buttonVariants({ size: "lg" }),
-                  "rounded-full px-8"
+                  "rounded-full px-7 shadow-sm sm:px-8"
                 )}
               >
                 Shop Collection
                 <ArrowRight className="size-4" />
               </Link>
               <Link
-                href="/about"
+                href="/shop/skincare"
                 className={cn(
                   buttonVariants({ size: "lg", variant: "outline" }),
-                  "rounded-full bg-white/60 px-8 backdrop-blur-sm"
+                  "rounded-full border-border/60 bg-white/70 px-7 backdrop-blur-sm sm:px-8"
                 )}
               >
-                Our Story
+                Skincare Essentials
               </Link>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-6 pt-4 lg:justify-start">
+            <div className="flex flex-wrap items-center justify-center gap-5 border-t border-border/40 pt-5 sm:gap-8 sm:pt-6 lg:justify-start">
               {[
                 { value: "500+", label: "Premium Products" },
                 { value: "50K+", label: "Happy Customers" },
-                { value: "4.9", label: "Average Rating" },
+                { value: "4.9★", label: "Average Rating" },
               ].map((stat) => (
                 <div key={stat.label} className="text-center lg:text-left">
-                  <p className="font-heading text-2xl font-semibold text-foreground">
+                  <p className="font-heading text-xl font-semibold text-foreground sm:text-2xl">
                     {stat.value}
                   </p>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  <p className="text-[11px] text-muted-foreground sm:text-xs">
+                    {stat.label}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-gradient-to-br from-rose-200 via-nude-200 to-beige-100 shadow-xl">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.4),transparent_50%)]" />
-              <div className="absolute bottom-6 left-6 right-6 rounded-2xl border border-white/40 bg-white/70 p-4 backdrop-blur-md">
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  Featured
+          <div className="relative mx-auto w-full max-w-sm sm:max-w-md lg:max-w-none">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-gradient-to-br from-rose-200 via-nude-200 to-beige-100 shadow-xl ring-1 ring-border/20">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.45),transparent_55%)]" />
+              <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/50 bg-white/75 p-4 backdrop-blur-md sm:inset-x-6 sm:bottom-6 sm:p-5">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-primary sm:text-xs">
+                  Editor&apos;s Pick
                 </p>
-                <p className="mt-1 font-heading text-lg font-medium">
+                <p className="mt-1 font-heading text-base font-medium sm:text-lg">
                   Velvet Rose Hydrating Serum
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  Deep hydration with a dewy finish
+                <p className="text-xs text-muted-foreground sm:text-sm">
+                  Deep hydration with a dewy, luminous finish
                 </p>
               </div>
             </div>
-            <div className="absolute -bottom-4 -left-4 hidden size-24 rounded-2xl bg-gradient-to-br from-pink-100 to-rose-200 shadow-lg sm:block" />
-            <div className="absolute -right-4 -top-4 hidden size-20 rounded-full bg-gradient-to-br from-beige-200 to-nude-100 shadow-md sm:block" />
+            <div className="absolute -bottom-3 -left-3 hidden size-20 rounded-2xl bg-gradient-to-br from-pink-100 to-rose-200 shadow-lg sm:block lg:-bottom-4 lg:-left-4 lg:size-24" />
+            <div className="absolute -right-3 -top-3 hidden size-16 rounded-full bg-gradient-to-br from-beige-200 to-nude-100 shadow-md sm:block lg:-right-4 lg:-top-4 lg:size-20" />
           </div>
         </div>
       </Container>

@@ -1,7 +1,5 @@
-export { BestSellers } from "./best-sellers";
-export { BrandStory } from "./brand-story";
 export { FeaturedCategories } from "./featured-categories";
 export { HeroSection } from "./hero-section";
-export { NewArrivals } from "./new-arrivals";
-export { NewsletterSection } from "./newsletter-section";
-export { PromoBanner } from "./promo-banner";
+export { SkinConcerns } from "./skin-concerns";
+export { TopBrands } from "./top-brands";
+export { TrendingProducts } from "./trending-products";

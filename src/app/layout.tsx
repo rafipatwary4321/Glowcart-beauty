@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Playfair_Display, Geist } from "next/font/google";
 
-import { Footer } from "@/components/layout/footer";
-import { Navbar } from "@/components/layout/navbar";
+import { Footer, SiteHeader } from "@/components/layout";
 import { AppProviders } from "@/providers";
 import { siteConfig } from "@/constants/site-config";
 
@@ -43,7 +42,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col">
         <AppProviders>
-          <Navbar />
+          <SiteHeader />
           <main className="flex-1">{children}</main>
           <Footer />
         </AppProviders>
