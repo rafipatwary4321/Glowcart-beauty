@@ -1,6 +1,6 @@
-import { Schema, model, models, type InferSchemaType, type Model, type Types } from "mongoose";
+import { Schema, model, models, type HydratedDocument, type InferSchemaType, type Model, type Types } from "mongoose";
 
-import type { DeliveryMethod, OrderStatus, PaymentMethod } from "@/types/order";
+import type { DeliveryMethod, OrderStatus, PaymentMethod, PaymentStatus } from "@/types/order";
 
 const orderItemSchema = new Schema(
   {
@@ -46,7 +46,7 @@ const orderSchema = new Schema(
       type: String,
       enum: [
         "pending",
-        "paid",
+        "confirmed",
         "processing",
         "shipped",
         "delivered",
@@ -67,9 +67,12 @@ const orderSchema = new Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["pending", "paid", "failed", "refunded"],
+      enum: ["pending", "paid", "failed", "cancelled", "refunded"] satisfies PaymentStatus[],
       default: "pending",
     },
+    transactionId: { type: String, trim: true, index: true },
+    stockFulfilled: { type: Boolean, default: false },
+    paymentGatewayResponse: { type: Schema.Types.Mixed },
     shippingAddress: { type: shippingAddressSchema, required: true },
     couponCode: { type: String, trim: true },
     trackingCode: { type: String, trim: true },
@@ -86,9 +89,11 @@ orderSchema.virtual("orderStatus").get(function orderStatus() {
   return this.status;
 });
 
-export type OrderDocument = InferSchemaType<typeof orderSchema> & {
-  user: Types.ObjectId;
-};
+export type OrderDocument = HydratedDocument<
+  InferSchemaType<typeof orderSchema> & {
+    user: Types.ObjectId;
+  }
+>;
 
 export type OrderModel = Model<OrderDocument>;
 

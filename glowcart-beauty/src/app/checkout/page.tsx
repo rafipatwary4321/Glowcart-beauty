@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { CheckoutPageContent } from "@/components/checkout";
 import { Container } from "@/components/common/container";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata: Metadata = {
   title: "Checkout",
@@ -24,7 +26,9 @@ export default function CheckoutPage() {
           </p>
         </div>
 
-        <CheckoutPageContent />
+        <Suspense fallback={<Skeleton className="h-96 w-full rounded-2xl" />}>
+          <CheckoutPageContent />
+        </Suspense>
       </Container>
     </section>
   );

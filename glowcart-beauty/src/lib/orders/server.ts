@@ -130,8 +130,9 @@ export async function buildOrderPayload(input: BuildOrderInput) {
   });
 
   const initialOrderStatus: OrderStatus =
-    input.paymentMethod === "cod" ? "processing" : "pending";
+    input.paymentMethod === "cod" ? "confirmed" : "pending";
   const initialPaymentStatus: PaymentStatus = "pending";
+  const shouldFulfillInventory = input.paymentMethod === "cod";
 
   return {
     orderItems,
@@ -141,6 +142,7 @@ export async function buildOrderPayload(input: BuildOrderInput) {
     initialOrderStatus,
     initialPaymentStatus,
     isOnlinePayment: isOnlinePaymentMethod(input.paymentMethod),
+    shouldFulfillInventory,
   };
 }
 

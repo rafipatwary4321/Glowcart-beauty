@@ -13,14 +13,14 @@ type RouteContext = {
 
 const orderStatuses: OrderStatus[] = [
   "pending",
-  "paid",
+  "confirmed",
   "processing",
   "shipped",
   "delivered",
   "cancelled",
 ];
 
-const paymentStatuses = ["pending", "paid", "failed", "refunded"] as const;
+const paymentStatuses = ["pending", "paid", "failed", "cancelled", "refunded"] as const;
 
 async function findOrderById(id: string) {
   if (!isValidObjectId(id)) {
@@ -66,6 +66,7 @@ export const PATCH = withDb(async (request: Request, context?: unknown) => {
     orderStatus?: string;
     paymentStatus?: string;
     trackingCode?: string;
+    transactionId?: string;
   };
 
   const update: Record<string, unknown> = {};
@@ -86,6 +87,10 @@ export const PATCH = withDb(async (request: Request, context?: unknown) => {
 
   if (body.trackingCode !== undefined) {
     update.trackingCode = body.trackingCode.trim() || undefined;
+  }
+
+  if (body.transactionId !== undefined) {
+    update.transactionId = body.transactionId.trim() || undefined;
   }
 
   const order = await Order.findByIdAndUpdate(id, update, {

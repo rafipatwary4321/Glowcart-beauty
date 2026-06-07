@@ -11,9 +11,10 @@ export type AdminOrderRow = {
   customerName: string;
   customerEmail: string;
   total: number;
-  status: "pending" | "paid" | "processing" | "shipped" | "delivered" | "cancelled";
-  paymentStatus: "pending" | "paid" | "failed" | "refunded";
+  status: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
+  paymentStatus: "pending" | "paid" | "failed" | "cancelled" | "refunded";
   paymentMethod: string;
+  transactionId?: string;
   createdAt: string;
   itemCount: number;
 };

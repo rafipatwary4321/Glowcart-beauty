@@ -70,7 +70,12 @@ export async function fetchAdminOrders(): Promise<OrderSummary[]> {
 
 export async function updateOrderStatus(
   id: string,
-  payload: { orderStatus?: string; paymentStatus?: string; trackingCode?: string }
+  payload: {
+    orderStatus?: string;
+    paymentStatus?: string;
+    trackingCode?: string;
+    transactionId?: string;
+  }
 ): Promise<OrderSummary> {
   const response = await fetch(`/api/orders/${id}`, {
     method: "PATCH",

@@ -1,9 +1,8 @@
 export const PAYMENT_METHODS = [
   { value: "cod", label: "Cash on Delivery", description: "Pay when your order arrives." },
-  { value: "bkash", label: "bKash", description: "Mobile wallet payment — gateway coming soon." },
-  { value: "nagad", label: "Nagad", description: "Mobile wallet payment — gateway coming soon." },
-  { value: "sslcommerz", label: "SSLCommerz", description: "Cards & mobile banking — gateway coming soon." },
-  { value: "card", label: "Credit / Debit Card", description: "Visa, Mastercard — gateway coming soon." },
+  { value: "sslcommerz", label: "SSLCommerz", description: "Cards, mobile banking & internet banking." },
+  { value: "bkash", label: "bKash", description: "Pay securely with your bKash wallet." },
+  { value: "nagad", label: "Nagad", description: "Pay securely with your Nagad wallet." },
 ] as const;
 
 export const DELIVERY_METHODS = [
@@ -36,4 +35,8 @@ export function getDeliveryMethodLabel(method: string): string {
 
 export function isOnlinePaymentMethod(method: string): boolean {
   return method !== "cod";
+}
+
+export function requiresGatewayRedirect(method: string): boolean {
+  return method === "sslcommerz" || method === "bkash" || method === "nagad";
 }

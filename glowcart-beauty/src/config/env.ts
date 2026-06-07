@@ -28,14 +28,31 @@ export const env = {
   cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET ?? "",
   sslcommerzStoreId: process.env.SSLCOMMERZ_STORE_ID ?? "",
   sslcommerzStorePassword: process.env.SSLCOMMERZ_STORE_PASSWORD ?? "",
+  sslcommerzIsLive: process.env.SSLCOMMERZ_IS_LIVE === "true",
   bkashAppKey: process.env.BKASH_APP_KEY ?? "",
   bkashAppSecret: process.env.BKASH_APP_SECRET ?? "",
+  bkashUsername: process.env.BKASH_USERNAME ?? "",
+  bkashPassword: process.env.BKASH_PASSWORD ?? "",
+  nagadMerchantId: process.env.NAGAD_MERCHANT_ID ?? "",
+  nagadMerchantPrivateKey: process.env.NAGAD_MERCHANT_PRIVATE_KEY ?? "",
 } as const;
 
 export function isCloudinaryConfigured(): boolean {
   return Boolean(
     env.cloudinaryCloudName && env.cloudinaryApiKey && env.cloudinaryApiSecret
   );
+}
+
+export function isSSLCommerzConfigured(): boolean {
+  return Boolean(env.sslcommerzStoreId && env.sslcommerzStorePassword);
+}
+
+export function isBkashConfigured(): boolean {
+  return Boolean(env.bkashAppKey && env.bkashAppSecret);
+}
+
+export function isNagadConfigured(): boolean {
+  return Boolean(env.nagadMerchantId && env.nagadMerchantPrivateKey);
 }
 
 export function isProduction(): boolean {

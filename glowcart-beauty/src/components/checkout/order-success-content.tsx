@@ -9,9 +9,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { routes } from "@/constants/routes";
 import { formatPrice } from "@/lib/format";
-import { formatOrderStatus } from "@/lib/orders/mappers";
+import { formatOrderStatus, formatPaymentStatus } from "@/lib/orders/mappers";
 import { getPaymentMethodLabel } from "@/lib/orders/constants";
 import { fetchOrderById } from "@/lib/orders/service";
+import { useCartStore } from "@/store/cart-store";
 import type { OrderSummary } from "@/types/order";
 
 type OrderSuccessContentProps = {
@@ -22,6 +23,7 @@ export function OrderSuccessContent({ orderId }: OrderSuccessContentProps) {
   const [order, setOrder] = useState<OrderSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const clearCart = useCartStore((state) => state.clearCart);
 
   useEffect(() => {
     async function loadOrder() {
@@ -29,6 +31,10 @@ export function OrderSuccessContent({ orderId }: OrderSuccessContentProps) {
       try {
         const data = await fetchOrderById(orderId);
         setOrder(data);
+
+        if (data.paymentMethod === "cod" || data.paymentStatus === "paid") {
+          clearCart();
+        }
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : "Order not found.");
       } finally {
@@ -37,7 +43,7 @@ export function OrderSuccessContent({ orderId }: OrderSuccessContentProps) {
     }
 
     void loadOrder();
-  }, [orderId]);
+  }, [orderId, clearCart]);
 
   if (loading) {
     return (
@@ -98,6 +104,16 @@ export function OrderSuccessContent({ orderId }: OrderSuccessContentProps) {
             <p className="text-xs uppercase tracking-wide text-muted-foreground">Payment method</p>
             <p className="font-medium">{getPaymentMethodLabel(order.paymentMethod)}</p>
           </div>
+          <div>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Payment status</p>
+            <p className="font-medium">{formatPaymentStatus(order.paymentStatus)}</p>
+          </div>
+          {order.transactionId ? (
+            <div>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Transaction ID</p>
+              <p className="font-medium break-all">{order.transactionId}</p>
+            </div>
+          ) : null}
           <div>
             <p className="text-xs uppercase tracking-wide text-muted-foreground">Order status</p>
             <p className="font-medium">{formatOrderStatus(order.orderStatus)}</p>

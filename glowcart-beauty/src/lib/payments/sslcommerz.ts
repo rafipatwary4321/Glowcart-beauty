@@ -1,13 +1,18 @@
-/**
- * SSLCommerz payment gateway integration.
- * @see https://developer.sslcommerz.com/
- */
-export async function createSSLCommerzSession(_orderId: string, _amount: number) {
-  // TODO: POST to SSLCommerz session API
-  throw new Error("SSLCommerz not configured");
-}
+export {
+  generatePaymentTransactionId,
+  initSSLCommerzSession,
+  validateSSLCommerzPayment,
+} from "@/lib/payment/sslcommerz";
 
-export async function validateSSLCommerzIPN(_payload: unknown) {
-  // TODO: validate IPN callback
-  throw new Error("SSLCommerz not configured");
+/** @deprecated Use initSSLCommerzSession from @/lib/payment */
+export { initSSLCommerzSession as createSSLCommerzSession } from "@/lib/payment/sslcommerz";
+
+/** @deprecated Use validateSSLCommerzPayment from @/lib/payment */
+export async function validateSSLCommerzIPN(payload: unknown) {
+  const valId =
+    payload && typeof payload === "object" && "val_id" in payload
+      ? String((payload as { val_id: string }).val_id)
+      : "";
+  const { validateSSLCommerzPayment } = await import("@/lib/payment/sslcommerz");
+  return validateSSLCommerzPayment(valId);
 }

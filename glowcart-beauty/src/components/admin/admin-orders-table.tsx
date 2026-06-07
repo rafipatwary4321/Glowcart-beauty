@@ -16,12 +16,13 @@ import { getPaymentMethodLabel } from "@/lib/orders/constants";
 import { mapOrderSummaryToAdminRow } from "@/lib/orders/mappers";
 import { fetchAdminOrders, updateOrderStatus } from "@/lib/orders/service";
 import type { AdminOrderRow } from "@/types/admin";
-import type { OrderStatus } from "@/types/order";
+import type { OrderStatus, PaymentStatus } from "@/types/order";
 
 const paymentVariant = {
   pending: "outline",
   paid: "default",
   failed: "destructive",
+  cancelled: "outline",
   refunded: "outline",
 } as const;
 
@@ -60,11 +61,56 @@ function OrderStatusSelect({
         disabled={saving}
       >
         <option value="pending">Pending</option>
-        <option value="paid">Paid</option>
+        <option value="confirmed">Confirmed</option>
         <option value="processing">Processing</option>
         <option value="shipped">Shipped</option>
         <option value="delivered">Delivered</option>
         <option value="cancelled">Cancelled</option>
+      </Select>
+      {saving ? <Loader2 className="size-4 animate-spin text-muted-foreground" /> : null}
+    </div>
+  );
+}
+
+function PaymentStatusSelect({
+  order,
+  onUpdated,
+}: {
+  order: AdminOrderRow;
+  onUpdated: () => Promise<void>;
+}) {
+  const [status, setStatus] = useState(order.paymentStatus);
+  const [saving, setSaving] = useState(false);
+
+  async function handleChange(nextStatus: PaymentStatus) {
+    setStatus(nextStatus);
+    setSaving(true);
+
+    try {
+      await updateOrderStatus(order.id, { paymentStatus: nextStatus });
+      toast.success("Payment status updated.");
+      await onUpdated();
+    } catch (error) {
+      setStatus(order.paymentStatus);
+      toast.error(error instanceof Error ? error.message : "Update failed.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <Select
+        value={status}
+        onChange={(event) => void handleChange(event.target.value as PaymentStatus)}
+        className="h-8 min-w-28 text-xs"
+        disabled={saving}
+      >
+        <option value="pending">Pending</option>
+        <option value="paid">Paid</option>
+        <option value="failed">Failed</option>
+        <option value="cancelled">Cancelled</option>
+        <option value="refunded">Refunded</option>
       </Select>
       {saving ? <Loader2 className="size-4 animate-spin text-muted-foreground" /> : null}
     </div>
@@ -123,20 +169,22 @@ export function AdminOrdersTable() {
       key: "payment",
       header: "Payment",
       cell: (row) => (
-        <div className="space-y-1">
-          <AdminStatusBadge
-            label={row.paymentStatus}
-            variant={paymentVariant[row.paymentStatus]}
-          />
+        <div className="space-y-2">
+          <PaymentStatusSelect order={row} onUpdated={loadItems} />
           <p className="text-xs text-muted-foreground">
             {getPaymentMethodLabel(row.paymentMethod)}
           </p>
+          {row.transactionId ? (
+            <p className="max-w-40 truncate text-xs text-muted-foreground" title={row.transactionId}>
+              TXN: {row.transactionId}
+            </p>
+          ) : null}
         </div>
       ),
     },
     {
       key: "status",
-      header: "Status",
+      header: "Order Status",
       cell: (row) => <OrderStatusSelect order={row} onUpdated={loadItems} />,
     },
   ];

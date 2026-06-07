@@ -1,12 +1,12 @@
 export type OrderStatus =
   | "pending"
-  | "paid"
+  | "confirmed"
   | "processing"
   | "shipped"
   | "delivered"
   | "cancelled";
 
-export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
+export type PaymentStatus = "pending" | "paid" | "failed" | "cancelled" | "refunded";
 
 export type PaymentMethod = "cod" | "bkash" | "nagad" | "sslcommerz" | "card";
 
@@ -50,6 +50,7 @@ export type OrderSummary = {
   shippingAddress: ShippingAddress;
   couponCode?: string;
   trackingCode?: string;
+  transactionId?: string;
   notes?: string;
   createdAt: string;
   itemCount: number;

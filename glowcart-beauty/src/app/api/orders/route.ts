@@ -114,17 +114,22 @@ export const POST = withDb(async (request: Request) => {
     shippingAddress: input.shippingAddress,
     couponCode: built.couponCode,
     notes: input.notes?.trim(),
+    stockFulfilled: false,
   });
 
-  await decrementProductStock(built.orderItems);
-  await incrementCouponUsage(built.couponId);
+  if (built.shouldFulfillInventory) {
+    await decrementProductStock(built.orderItems);
+    await incrementCouponUsage(built.couponId);
+    order.stockFulfilled = true;
+    await order.save();
+  }
 
   const populated = await Order.findById(order._id).populate("user", "name email");
 
   return apiSuccess(serializeDocument(populated!), {
     status: 201,
     message: built.isOnlinePayment
-      ? "Order created. Payment gateway integration coming soon."
+      ? "Order created. Complete payment to confirm."
       : "Order placed successfully.",
   });
 });

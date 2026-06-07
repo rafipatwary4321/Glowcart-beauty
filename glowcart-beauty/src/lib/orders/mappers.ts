@@ -69,6 +69,7 @@ export function mapApiOrder(record: ApiOrderRecord): OrderSummary {
     shippingAddress: mapShippingAddress(record.shippingAddress),
     couponCode: asString(record.couponCode) || undefined,
     trackingCode: asString(record.trackingCode) || undefined,
+    transactionId: asString(record.transactionId) || undefined,
     notes: asString(record.notes) || undefined,
     createdAt: asString(record.createdAt, new Date().toISOString()),
     itemCount: items.reduce((count, item) => count + item.quantity, 0),
@@ -87,6 +88,7 @@ export function mapApiOrderToAdminRow(record: ApiOrderRecord): AdminOrderRow {
     status: order.orderStatus,
     paymentStatus: order.paymentStatus,
     paymentMethod: order.paymentMethod,
+    transactionId: order.transactionId,
     createdAt: order.createdAt,
     itemCount: order.itemCount,
   };
@@ -102,11 +104,16 @@ export function mapOrderSummaryToAdminRow(order: OrderSummary): AdminOrderRow {
     status: order.orderStatus,
     paymentStatus: order.paymentStatus,
     paymentMethod: order.paymentMethod,
+    transactionId: order.transactionId,
     createdAt: order.createdAt,
     itemCount: order.itemCount,
   };
 }
 
 export function formatOrderStatus(status: OrderStatus): string {
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+export function formatPaymentStatus(status: PaymentStatus): string {
   return status.charAt(0).toUpperCase() + status.slice(1);
 }

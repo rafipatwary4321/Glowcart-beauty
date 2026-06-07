@@ -11,7 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { routes } from "@/constants/routes";
 import { placeholderOrders, formatOrderStatus } from "@/data/placeholder-orders";
 import { formatPrice } from "@/lib/format";
-import { formatOrderStatus as formatApiOrderStatus } from "@/lib/orders/mappers";
+import { getPaymentMethodLabel } from "@/lib/orders/constants";
+import { formatOrderStatus as formatApiOrderStatus, formatPaymentStatus } from "@/lib/orders/mappers";
 import { fetchMyOrders } from "@/lib/orders/service";
 import type { OrderSummary } from "@/types/order";
 
@@ -38,16 +39,25 @@ function OrderCard({ order }: { order: OrderSummary }) {
           {formatApiOrderStatus(order.orderStatus)}
         </Badge>
       </CardHeader>
-      <CardContent className="flex flex-wrap items-center justify-between gap-2 text-sm">
-        <p className="text-muted-foreground">
-          {order.itemCount} item{order.itemCount === 1 ? "" : "s"}
-        </p>
-        <div className="flex items-center gap-3">
+      <CardContent className="space-y-3 text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-muted-foreground">
+            {order.itemCount} item{order.itemCount === 1 ? "" : "s"} · {getPaymentMethodLabel(order.paymentMethod)}
+          </p>
           <p className="font-medium text-foreground">{formatPrice(order.total)}</p>
-          <Button variant="outline" size="sm" className="rounded-full" asChild>
-            <Link href={routes.orderSuccess(order.id)}>View</Link>
-          </Button>
         </div>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground">
+          <span>Payment: {formatPaymentStatus(order.paymentStatus)}</span>
+          {order.trackingCode ? <span>Tracking: {order.trackingCode}</span> : null}
+          {order.transactionId ? (
+            <span className="truncate" title={order.transactionId}>
+              TXN: {order.transactionId}
+            </span>
+          ) : null}
+        </div>
+        <Button variant="outline" size="sm" className="rounded-full" asChild>
+          <Link href={routes.orderSuccess(order.id)}>View order</Link>
+        </Button>
       </CardContent>
     </Card>
   );

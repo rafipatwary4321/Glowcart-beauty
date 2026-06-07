@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, Loader2, MapPin, Package, ShieldCheck, Tag, Truck } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -22,8 +22,13 @@ import { routes } from "@/constants/routes";
 import { checkoutFormSchema, type CheckoutFormValues } from "@/lib/checkout/schemas";
 import { formatPrice } from "@/lib/format";
 import { calculateOrderTotals } from "@/lib/orders/calculate-totals";
-import { DELIVERY_METHODS, PAYMENT_METHODS } from "@/lib/orders/constants";
+import { DELIVERY_METHODS, PAYMENT_METHODS, requiresGatewayRedirect } from "@/lib/orders/constants";
 import { createOrder, validateCheckoutCoupon } from "@/lib/orders/service";
+import {
+  initBkashPayment,
+  initNagadPayment,
+  initSSLCommerzPayment,
+} from "@/lib/payment/client";
 import { useCartStore } from "@/store/cart-store";
 
 const defaultValues: CheckoutFormValues = {
@@ -47,6 +52,7 @@ const defaultValues: CheckoutFormValues = {
 
 export function CheckoutPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
   const items = useCartStore((state) => state.items);
   const clearCart = useCartStore((state) => state.clearCart);
@@ -88,6 +94,22 @@ export function CheckoutPageContent() {
       },
     }));
   }, [session, reset]);
+
+  useEffect(() => {
+    const paymentState = searchParams.get("payment");
+
+    if (paymentState === "cancelled") {
+      toast.message("Payment cancelled. You can review your cart and try again.");
+    } else if (paymentState === "failed") {
+      toast.error("Payment failed. Please try again or choose another method.");
+    } else if (paymentState === "error") {
+      toast.error("Payment could not be verified. Contact support if you were charged.");
+    }
+
+    if (paymentState) {
+      router.replace(routes.checkout);
+    }
+  }, [searchParams, router]);
 
   const totals = useMemo(
     () =>
@@ -143,16 +165,29 @@ export function CheckoutPageContent() {
         })),
       });
 
-      clearCart();
-      toast.success("Order placed successfully.");
-
       if (values.paymentMethod === "cod") {
+        clearCart();
+        toast.success("Order placed successfully.");
         router.push(routes.orderSuccess(order.id));
         return;
       }
 
-      toast.message("Payment gateway coming soon. Your order has been saved as pending.");
-      router.push(routes.orderSuccess(order.id));
+      if (!requiresGatewayRedirect(values.paymentMethod)) {
+        toast.error("Unsupported payment method.");
+        return;
+      }
+
+      toast.message("Redirecting to payment gateway...");
+
+      const initPayment =
+        values.paymentMethod === "sslcommerz"
+          ? initSSLCommerzPayment
+          : values.paymentMethod === "bkash"
+            ? initBkashPayment
+            : initNagadPayment;
+
+      const payment = await initPayment(order.id);
+      window.location.href = payment.gatewayUrl;
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Unable to place order.");
     }
@@ -279,7 +314,7 @@ export function CheckoutPageContent() {
               <Package className="size-5 text-primary" />
               Payment Method
             </CardTitle>
-            <CardDescription>Online gateways are placeholders — only COD completes immediately.</CardDescription>
+            <CardDescription>Select how you would like to pay.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-2">
