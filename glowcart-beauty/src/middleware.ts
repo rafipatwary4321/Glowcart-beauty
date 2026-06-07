@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
+import { getPostLoginRedirect } from "@/lib/auth/redirect";
 import { isAdminPath, isAuthPath, isProtectedPath } from "@/lib/auth/protected-routes";
 import { routes } from "@/constants/routes";
+
+const authRedirectPath = "/auth/redirect";
+
+function isAuthRedirectPath(pathname: string): boolean {
+  return pathname === authRedirectPath;
+}
 
 export default auth((request) => {
   const { pathname } = request.nextUrl;
@@ -17,7 +24,7 @@ export default auth((request) => {
     }
 
     if (userRole !== "admin") {
-      return NextResponse.redirect(new URL(routes.home, request.url));
+      return NextResponse.redirect(new URL(routes.profile, request.url));
     }
 
     return NextResponse.next();
@@ -29,12 +36,10 @@ export default auth((request) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isAuthPath(pathname) && isAuthenticated) {
+  if (isAuthPath(pathname) && isAuthenticated && !isAuthRedirectPath(pathname)) {
     const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
-    if (callbackUrl && isAdminPath(callbackUrl) && userRole === "admin") {
-      return NextResponse.redirect(new URL(callbackUrl, request.url));
-    }
-    return NextResponse.redirect(new URL(routes.profile, request.url));
+    const destination = getPostLoginRedirect(userRole ?? "customer", callbackUrl);
+    return NextResponse.redirect(new URL(destination, request.url));
   }
 
   return NextResponse.next();
@@ -51,5 +56,6 @@ export const config = {
     "/register",
     "/forgot-password",
     "/reset-password",
+    "/auth/redirect",
   ],
 };

@@ -8,6 +8,7 @@
  * Requires MONGODB_URI in .env.local or environment.
  */
 import { connectDB } from "@/lib/db";
+import { ensureAdminSeedUser } from "@/lib/auth/user-service";
 import {
   Banner,
   Brand,
@@ -40,22 +41,27 @@ async function clearCollections() {
 }
 
 async function seedUsers() {
-  const users = await User.create([
-    {
+  await ensureAdminSeedUser();
+
+  const demoEmail = "demo@glowcart.com";
+  const existingDemo = await User.findOne({ email: demoEmail });
+
+  if (!existingDemo) {
+    await User.create({
       name: "Ayesha Rahman",
-      email: "demo@glowcart.com",
+      email: demoEmail,
       password: "demo1234",
       role: "customer",
-    },
-    {
-      name: "GlowCart Admin",
-      email: "admin@glowcart.com",
-      password: "admin1234",
-      role: "admin",
-    },
-  ]);
+    });
+  }
 
-  console.log(`Seeded ${users.length} users.`);
+  const users = await User.find({
+    email: { $in: ["demo@glowcart.com", "admin@glowcart.com"] },
+  });
+
+  console.log(`Seeded ${users.length} auth users (admin + demo customer).`);
+  console.log("Admin login: admin@glowcart.com / admin1234");
+  console.log("Demo customer: demo@glowcart.com / demo1234");
   return users;
 }
 

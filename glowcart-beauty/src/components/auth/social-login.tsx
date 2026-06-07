@@ -5,19 +5,28 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { routes } from "@/constants/routes";
+
 type SocialLoginProps = {
   callbackUrl?: string;
   googleEnabled?: boolean;
 };
 
-export function SocialLogin({ callbackUrl = "/profile", googleEnabled = false }: SocialLoginProps) {
+export function SocialLogin({
+  callbackUrl = routes.authRedirect,
+  googleEnabled = false,
+}: SocialLoginProps) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleGoogleSignIn() {
     setLoading(true);
+    setError(null);
+
     try {
       await signIn("google", { callbackUrl });
-    } finally {
+    } catch {
+      setError("Google sign-in failed. Please try again.");
       setLoading(false);
     }
   }
@@ -38,12 +47,14 @@ export function SocialLogin({ callbackUrl = "/profile", googleEnabled = false }:
         onClick={handleGoogleSignIn}
         disabled={loading || !googleEnabled}
       >
-        Continue with Google
+        {loading ? "Connecting..." : "Continue with Google"}
       </Button>
+
+      {error ? <p className="text-center text-sm text-destructive">{error}</p> : null}
 
       {!googleEnabled ? (
         <p className="text-center text-xs text-muted-foreground">
-          Google sign-in is configured but requires{" "}
+          Google sign-in requires{" "}
           <code className="rounded bg-muted px-1 py-0.5">GOOGLE_CLIENT_ID</code> and{" "}
           <code className="rounded bg-muted px-1 py-0.5">GOOGLE_CLIENT_SECRET</code> in your
           environment.

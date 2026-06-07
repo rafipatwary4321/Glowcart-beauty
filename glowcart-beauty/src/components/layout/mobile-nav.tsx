@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
-import { LogOut, User } from "lucide-react";
+import { LayoutDashboard, LogOut, User } from "lucide-react";
 
 import { UserAvatar } from "@/components/profile/user-avatar";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { siteConfig } from "@/constants/site-config";
 import { routes } from "@/constants/routes";
+import { isAdmin } from "@/lib/auth/roles";
 
 type MobileNavProps = {
   open: boolean;
@@ -64,6 +65,14 @@ export function MobileNav({ open, onOpenChange }: MobileNavProps) {
                   My Profile
                 </Link>
               </Button>
+              {isAdmin(session) ? (
+                <Button variant="outline" className="w-full justify-start rounded-full" asChild>
+                  <Link href={routes.admin.root} onClick={() => onOpenChange(false)}>
+                    <LayoutDashboard className="size-4" />
+                    Admin Dashboard
+                  </Link>
+                </Button>
+              ) : null}
               <Button
                 variant="ghost"
                 className="w-full justify-start rounded-full text-destructive"

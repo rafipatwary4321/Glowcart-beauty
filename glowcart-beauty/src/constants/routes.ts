@@ -11,6 +11,7 @@ export const routes = {
   resetPassword: "/reset-password",
   profile: "/profile",
   account: "/profile",
+  authRedirect: "/auth/redirect",
   about: "/about",
   contact: "/contact",
   admin: {

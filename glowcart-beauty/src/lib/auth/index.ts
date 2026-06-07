@@ -6,7 +6,6 @@ export const authConfig = {
   trustHost: true,
 } as const;
 
-export { getMockUsers, findMockUserByEmail, addMockUser } from "./mock-users";
 export { hasRole, isAdmin, isCustomer, getUserRole, requireRole } from "./roles";
 export {
   validateLoginForm,
@@ -14,4 +13,21 @@ export {
   validateForgotPasswordForm,
   validateResetPasswordForm,
 } from "./validation";
-export { protectedRoutes, authRoutes, isProtectedPath, isAuthPath, isAdminPath, adminRoutePrefix } from "./protected-routes";
+export {
+  protectedRoutes,
+  authRoutes,
+  isProtectedPath,
+  isAuthPath,
+  isAdminPath,
+  adminRoutePrefix,
+} from "./protected-routes";
+export {
+  authenticateUser,
+  registerUser,
+  findUserByEmail,
+  findUserById,
+  findOrCreateOAuthUser,
+  ensureAdminSeedUser,
+} from "./user-service";
+export type { SafeUser } from "./user-service";
+export { getPostLoginRedirect, getDefaultAuthCallbackUrl } from "./redirect";

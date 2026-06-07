@@ -150,7 +150,7 @@ export function RegisterForm({ googleEnabled = false }: RegisterFormProps) {
         </Button>
       </form>
 
-      <SocialLogin callbackUrl={routes.profile} googleEnabled={googleEnabled} />
+      <SocialLogin callbackUrl={routes.authRedirect} googleEnabled={googleEnabled} />
 
       <p className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}

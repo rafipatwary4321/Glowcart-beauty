@@ -1,10 +1,9 @@
-import { NextResponse } from "next/server";
-
+import { ApiRouteError, apiSuccess, withDb } from "@/lib/api";
 import { auth } from "@/auth";
-import { findMockUserByEmail } from "@/lib/auth/mock-users";
 import { validateRegisterForm } from "@/lib/auth/validation";
+import { registerUser } from "@/lib/auth/user-service";
 
-export async function POST(request: Request) {
+export const POST = withDb(async (request: Request) => {
   const body = (await request.json()) as {
     name?: string;
     email?: string;
@@ -20,40 +19,54 @@ export async function POST(request: Request) {
   });
 
   if (!validation.valid) {
-    return NextResponse.json(
-      { message: "Validation failed.", errors: validation.errors },
-      { status: 400 }
-    );
+    throw new ApiRouteError("Validation failed.", 400, validation.errors);
   }
 
-  const email = body.email!.trim().toLowerCase();
+  try {
+    const user = await registerUser({
+      name: body.name!,
+      email: body.email!,
+      password: body.password!,
+      role: "customer",
+    });
 
-  if (findMockUserByEmail(email)) {
-    return NextResponse.json(
-      { message: "An account with this email already exists." },
-      { status: 409 }
+    return apiSuccess(
+      {
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      },
+      {
+        status: 201,
+        message: "Account created. You can sign in now.",
+      }
     );
+  } catch (error) {
+    if (error instanceof Error && error.message === "EMAIL_EXISTS") {
+      throw new ApiRouteError("An account with this email already exists.", 409);
+    }
+    throw error;
   }
-
-  /**
-   * Placeholder registration — persists only in server memory for the current process.
-   * Replace with database persistence when backend auth is implemented.
-   */
-  const { addMockUser } = await import("@/lib/auth/mock-users");
-  addMockUser({
-    name: body.name!.trim(),
-    email,
-    password: body.password!,
-    role: "customer",
-  });
-
-  return NextResponse.json(
-    { message: "Account created. You can sign in now." },
-    { status: 201 }
-  );
-}
+});
 
 export async function GET() {
   const session = await auth();
-  return NextResponse.json({ authenticated: Boolean(session) });
+
+  if (!session?.user) {
+    return apiSuccess({ authenticated: false });
+  }
+
+  return apiSuccess({
+    authenticated: true,
+    user: {
+      id: session.user.id,
+      name: session.user.name,
+      email: session.user.email,
+      role: session.user.role,
+      image: session.user.image,
+    },
+  });
 }

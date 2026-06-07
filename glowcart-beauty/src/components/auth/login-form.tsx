@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 import { SocialLogin } from "@/components/auth/social-login";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { routes } from "@/constants/routes";
+import { getPostLoginRedirect } from "@/lib/auth/redirect";
 import { validateLoginForm } from "@/lib/auth/validation";
 
 const REMEMBER_EMAIL_KEY = "glowcart-remember-email";
@@ -20,7 +21,7 @@ type LoginFormProps = {
 export function LoginForm({ googleEnabled = false }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? routes.profile;
+  const callbackUrl = searchParams.get("callbackUrl");
   const registered = searchParams.get("registered") === "1";
 
   const [email, setEmail] = useState("");
@@ -61,19 +62,26 @@ export function LoginForm({ googleEnabled = false }: LoginFormProps) {
       email: email.trim(),
       password,
       redirect: false,
-      callbackUrl,
     });
 
-    setLoading(false);
-
     if (result?.error) {
-      setFormError("Invalid email or password. Try demo@glowcart.com / demo1234.");
+      setLoading(false);
+      setFormError("Invalid email or password.");
       return;
     }
 
-    router.push(result?.url ?? callbackUrl);
+    const session = await getSession();
+    const role = session?.user?.role ?? "customer";
+    const destination = getPostLoginRedirect(role, callbackUrl);
+
+    setLoading(false);
+    router.push(destination);
     router.refresh();
   }
+
+  const socialCallbackUrl = callbackUrl
+    ? `${routes.authRedirect}?callbackUrl=${encodeURIComponent(callbackUrl)}`
+    : routes.authRedirect;
 
   return (
     <div className="space-y-6">
@@ -145,7 +153,7 @@ export function LoginForm({ googleEnabled = false }: LoginFormProps) {
         </Button>
       </form>
 
-      <SocialLogin callbackUrl={callbackUrl} googleEnabled={googleEnabled} />
+      <SocialLogin callbackUrl={socialCallbackUrl} googleEnabled={googleEnabled} />
 
       <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}

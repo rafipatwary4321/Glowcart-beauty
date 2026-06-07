@@ -1,5 +1,12 @@
 import bcrypt from "bcryptjs";
-import { Schema, model, models, type InferSchemaType, type Model } from "mongoose";
+import {
+  Schema,
+  model,
+  models,
+  type HydratedDocument,
+  type InferSchemaType,
+  type Model,
+} from "mongoose";
 
 import type { UserRole } from "@/types/user";
 
@@ -56,11 +63,15 @@ userSchema.methods.comparePassword = async function comparePassword(
   return bcrypt.compare(candidate, this.password);
 };
 
-export type UserDocument = InferSchemaType<typeof userSchema> & {
-  comparePassword(candidate: string): Promise<boolean>;
-};
+type User = InferSchemaType<typeof userSchema>;
 
-export type UserModel = Model<UserDocument>;
+interface UserMethods {
+  comparePassword(candidate: string): Promise<boolean>;
+}
+
+export type UserDocument = HydratedDocument<User, UserMethods>;
+
+export type UserModel = Model<User, {}, UserMethods>;
 
 export const User =
-  (models.User as UserModel | undefined) ?? model<UserDocument>("User", userSchema);
+  (models.User as UserModel | undefined) ?? model<User, UserModel>("User", userSchema);

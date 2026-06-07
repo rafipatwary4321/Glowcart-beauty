@@ -4,3 +4,4 @@ export { RegisterForm } from "./register-form";
 export { SocialLogin } from "./social-login";
 export { ForgotPasswordForm } from "./forgot-password-form";
 export { ResetPasswordForm } from "./reset-password-form";
+export { AuthRedirectContent } from "./auth-redirect-content";

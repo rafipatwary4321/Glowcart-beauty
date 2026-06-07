@@ -4,15 +4,23 @@ import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
 import { authConfig } from "@/lib/auth";
-import { findMockUserByEmail } from "@/lib/auth/mock-users";
+import { authenticateUser, findOrCreateOAuthUser, findUserById } from "@/lib/auth/user-service";
+import { connectDB } from "@/lib/db";
 import type { UserRole } from "@/types/user";
 
 function getAuthSecret(): string {
-  return (
+  const secret =
     process.env.AUTH_SECRET ??
     process.env.NEXTAUTH_SECRET ??
-    (process.env.NODE_ENV === "development" ? "glowcart-dev-auth-secret" : "")
-  );
+    (process.env.NODE_ENV === "development" ? "glowcart-dev-auth-secret" : "");
+
+  const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
+
+  if (!secret && process.env.NODE_ENV === "production" && !isBuildPhase) {
+    throw new Error("AUTH_SECRET or NEXTAUTH_SECRET must be set in production.");
+  }
+
+  return secret || "glowcart-build-auth-secret-placeholder";
 }
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID ?? process.env.AUTH_GOOGLE_ID;
@@ -34,19 +42,21 @@ const providers: Provider[] = [
         return null;
       }
 
-      const user = findMockUserByEmail(email);
+      try {
+        await connectDB();
+        const user = await authenticateUser(email, password);
+        if (!user) return null;
 
-      if (!user || user.password !== password) {
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+          role: user.role,
+        };
+      } catch {
         return null;
       }
-
-      return {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        image: user.image,
-        role: user.role,
-      };
     },
   }),
 ];
@@ -56,6 +66,7 @@ if (googleClientId && googleClientSecret) {
     Google({
       clientId: googleClientId,
       clientSecret: googleClientSecret,
+      allowDangerousEmailAccountLinking: false,
     })
   );
 }
@@ -67,16 +78,69 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60,
+    updateAge: 24 * 60 * 60,
   },
   callbacks: {
-    async jwt({ token, user, account }) {
+    async signIn({ user, account, profile }) {
+      if (account?.provider !== "google") {
+        return true;
+      }
+
+      const email = user.email ?? profile?.email;
+      if (!email || typeof email !== "string") {
+        return false;
+      }
+
+      try {
+        await connectDB();
+        const dbUser = await findOrCreateOAuthUser({
+          email,
+          name: user.name ?? profile?.name,
+          image: user.image ?? (typeof profile?.picture === "string" ? profile.picture : null),
+        });
+
+        user.id = dbUser.id;
+        user.role = dbUser.role;
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    async jwt({ token, user, account, trigger }) {
       if (user) {
         token.id = user.id;
         token.role = user.role ?? "customer";
+        token.email = user.email ?? token.email;
       }
 
-      if (account?.provider === "google" && !token.role) {
-        token.role = "customer" satisfies UserRole;
+      if (account?.provider === "google" && user?.email && !token.id) {
+        try {
+          await connectDB();
+          const dbUser = await findOrCreateOAuthUser({
+            email: user.email,
+            name: user.name,
+            image: user.image,
+          });
+          token.id = dbUser.id;
+          token.role = dbUser.role;
+        } catch {
+          token.role = "customer";
+        }
+      }
+
+      if (trigger === "update" && token.id) {
+        try {
+          await connectDB();
+          const dbUser = await findUserById(String(token.id));
+          if (dbUser) {
+            token.role = dbUser.role as UserRole;
+            token.name = dbUser.name;
+            token.email = dbUser.email;
+            token.picture = dbUser.image;
+          }
+        } catch {
+          // Keep existing token on refresh failure.
+        }
       }
 
       return token;
@@ -85,6 +149,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.id = typeof token.id === "string" ? token.id : "";
         session.user.role = (token.role as UserRole | undefined) ?? "customer";
+        if (typeof token.name === "string") session.user.name = token.name;
+        if (typeof token.email === "string") session.user.email = token.email;
+        if (typeof token.picture === "string") session.user.image = token.picture;
       }
       return session;
     },
