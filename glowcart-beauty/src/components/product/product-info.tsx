@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, ShoppingBag, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import { useState } from "react";
 
+import { AddToCartButton } from "@/components/product/add-to-cart-button";
 import { QuantitySelector } from "@/components/product/quantity-selector";
+import { WishlistButton } from "@/components/product/wishlist-button";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { calcDiscountPercent } from "@/lib/products/filter-products";
 import { formatPrice } from "@/lib/format";
@@ -108,22 +109,13 @@ export function ProductInfo({ product, className }: ProductInfoProps) {
           max={product.inStock ? Math.min(product.stockCount, 10) : 1}
         />
         <div className="flex flex-1 gap-3">
-          <Button
-            size="lg"
-            className="flex-1 rounded-full"
-            disabled={!product.inStock}
-          >
-            <ShoppingBag className="size-4" />
-            Add to Cart
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="rounded-full"
-            aria-label="Add to wishlist"
-          >
-            <Heart className="size-4" />
-          </Button>
+          <AddToCartButton
+            product={product}
+            quantity={quantity}
+            fullWidth
+            className="flex-1"
+          />
+          <WishlistButton product={product} />
         </div>
       </div>
 

@@ -1,3 +1,4 @@
+export { AddToCartButton } from "./add-to-cart-button";
 export { ProductCard } from "./product-card";
 export { ProductFilters, ProductListing } from "./product-filters";
 export { ProductGallery } from "./product-gallery";
@@ -6,3 +7,4 @@ export { ProductInfo } from "./product-info";
 export { QuantitySelector } from "./quantity-selector";
 export { RelatedProducts } from "./related-products";
 export { ReviewList } from "./review-list";
+export { WishlistButton } from "./wishlist-button";

@@ -1,1 +1,2 @@
-export { useCartStore, type CartItem, type CartState } from "./cart-store";
+export { useCartStore, type CartItem } from "./cart-store";
+export { useWishlistStore } from "./wishlist-store";

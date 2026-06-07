@@ -1,8 +1,11 @@
-import Link from "next/link";
-import { Heart, ShoppingBag, Star } from "lucide-react";
+"use client";
 
+import Link from "next/link";
+import { Star } from "lucide-react";
+
+import { AddToCartButton } from "@/components/product/add-to-cart-button";
+import { WishlistButton } from "@/components/product/wishlist-button";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { calcDiscountPercent } from "@/lib/products/filter-products";
 import { formatPrice } from "@/lib/format";
@@ -49,24 +52,23 @@ export function ProductCard({ product, className }: ProductCardProps) {
             Sold out
           </Badge>
         )}
-        <div className="absolute right-3 top-3 flex flex-col gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          {!product.inStock ? null : (
-            <Button
-              size="icon-sm"
-              variant="secondary"
-              className="rounded-full bg-white/90 shadow-sm backdrop-blur-sm hover:bg-white"
-              aria-label="Add to wishlist"
-            >
-              <Heart className="size-4" />
-            </Button>
-          )}
-        </div>
+        {product.inStock && (
+          <div className="absolute right-3 top-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <WishlistButton
+              product={product}
+              size="icon"
+              className="size-9 border-0 bg-white/90 shadow-sm backdrop-blur-sm hover:bg-white"
+            />
+          </div>
+        )}
         {product.inStock && (
           <div className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-            <Button className="w-full rounded-full bg-foreground text-background hover:bg-foreground/90">
-              <ShoppingBag className="size-4" />
-              Add to Cart
-            </Button>
+            <AddToCartButton
+              product={product}
+              fullWidth
+              size="default"
+              className="bg-foreground text-background hover:bg-foreground/90"
+            />
           </div>
         )}
       </div>

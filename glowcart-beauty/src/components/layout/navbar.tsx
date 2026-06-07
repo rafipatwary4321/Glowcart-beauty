@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Search, ShoppingBag, User } from "lucide-react";
+import { Menu, Search, User } from "lucide-react";
 import { useState } from "react";
 
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { NavCartButton, NavWishlistButton } from "@/components/layout/nav-actions";
 import { Container } from "@/components/common/container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,6 @@ import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const cartCount = 2;
 
   return (
     <header className="border-b border-border/60 bg-background/90 backdrop-blur-md">
@@ -71,14 +71,8 @@ export function Navbar() {
           <Button variant="ghost" size="icon" className="hidden sm:inline-flex" aria-label="Account">
             <User className="size-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="relative" aria-label="Shopping cart">
-            <ShoppingBag className="size-5" />
-            {cartCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
-                {cartCount}
-              </span>
-            )}
-          </Button>
+          <NavWishlistButton />
+          <NavCartButton />
         </div>
       </Container>
 
