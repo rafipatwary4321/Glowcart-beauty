@@ -1,0 +1,135 @@
+import type { Category, Product } from "@/types";
+
+export const featuredCategories: Category[] = [
+  {
+    id: "1",
+    name: "Skincare",
+    slug: "skincare",
+    productCount: 48,
+    imageGradient: "from-rose-100 via-pink-50 to-nude-100",
+    description: "Serums, moisturizers & glow essentials",
+  },
+  {
+    id: "2",
+    name: "Makeup",
+    slug: "makeup",
+    productCount: 62,
+    imageGradient: "from-nude-200 via-beige-100 to-rose-50",
+    description: "Flawless finishes for every occasion",
+  },
+  {
+    id: "3",
+    name: "Fragrances",
+    slug: "fragrances",
+    productCount: 24,
+    imageGradient: "from-beige-200 via-nude-100 to-white",
+    description: "Signature scents that linger beautifully",
+  },
+  {
+    id: "4",
+    name: "Gift Sets",
+    slug: "gifts",
+    productCount: 16,
+    imageGradient: "from-rose-200 via-pink-100 to-beige-100",
+    description: "Curated collections for gifting",
+  },
+];
+
+export const bestSellers: Product[] = [
+  {
+    id: "p1",
+    name: "Velvet Rose Hydrating Serum",
+    slug: "velvet-rose-hydrating-serum",
+    price: 2490,
+    originalPrice: 2990,
+    category: "Skincare",
+    rating: 4.9,
+    reviewCount: 128,
+    badge: "Bestseller",
+    imageGradient: "from-rose-200 to-pink-100",
+  },
+  {
+    id: "p2",
+    name: "Luminous Silk Foundation",
+    slug: "luminous-silk-foundation",
+    price: 3200,
+    category: "Makeup",
+    rating: 4.8,
+    reviewCount: 96,
+    badge: "Bestseller",
+    imageGradient: "from-nude-200 to-beige-100",
+  },
+  {
+    id: "p3",
+    name: "Nude Glow Lip Oil",
+    slug: "nude-glow-lip-oil",
+    price: 1650,
+    category: "Makeup",
+    rating: 4.7,
+    reviewCount: 74,
+    imageGradient: "from-pink-100 to-rose-50",
+  },
+  {
+    id: "p4",
+    name: "Midnight Bloom Eau de Parfum",
+    slug: "midnight-bloom-edp",
+    price: 4500,
+    category: "Fragrances",
+    rating: 4.9,
+    reviewCount: 52,
+    badge: "Bestseller",
+    imageGradient: "from-beige-300 to-nude-200",
+  },
+];
+
+export const newArrivals: Product[] = [
+  {
+    id: "p5",
+    name: "Cloud Soft Cleansing Balm",
+    slug: "cloud-soft-cleansing-balm",
+    price: 1890,
+    category: "Skincare",
+    rating: 4.6,
+    reviewCount: 18,
+    badge: "New",
+    imageGradient: "from-white to-rose-50",
+  },
+  {
+    id: "p6",
+    name: "Peach Blush Cushion Compact",
+    slug: "peach-blush-cushion",
+    price: 2100,
+    category: "Makeup",
+    rating: 4.5,
+    reviewCount: 12,
+    badge: "New",
+    imageGradient: "from-rose-100 to-peach-100",
+  },
+  {
+    id: "p7",
+    name: "Golden Hour Body Mist",
+    slug: "golden-hour-body-mist",
+    price: 1350,
+    category: "Fragrances",
+    rating: 4.4,
+    reviewCount: 9,
+    badge: "New",
+    imageGradient: "from-beige-100 to-nude-100",
+  },
+  {
+    id: "p8",
+    name: "Silk Repair Night Cream",
+    slug: "silk-repair-night-cream",
+    price: 2750,
+    originalPrice: 3100,
+    category: "Skincare",
+    rating: 4.8,
+    reviewCount: 24,
+    badge: "Sale",
+    imageGradient: "from-nude-100 to-pink-50",
+  },
+];
+
+export function formatPrice(amount: number): string {
+  return `৳${amount.toLocaleString("en-BD")}`;
+}
