@@ -16,6 +16,11 @@ export type AdminMutationResult<T> = {
   message?: string;
 };
 
+/** In-memory fallback is only used during local development when the API is unreachable. */
+export function isDevFallbackEnabled(): boolean {
+  return process.env.NODE_ENV === "development";
+}
+
 async function parseResponse<T>(response: Response): Promise<AdminMutationResult<T>> {
   const json = (await response.json()) as ApiSuccessResponse<T> | ApiErrorResponse;
 
@@ -48,8 +53,12 @@ export async function adminGet<T>(
     }
 
     return { data: result.data, source: "api", message: result.message };
-  } catch {
-    return { data: fallback(), source: "fallback" };
+  } catch (error) {
+    if (isDevFallbackEnabled()) {
+      return { data: fallback(), source: "fallback" };
+    }
+
+    throw error instanceof Error ? error : new Error("Unable to reach the server.");
   }
 }
 
@@ -70,7 +79,7 @@ export async function adminMutate<T>(
     const result = await parseResponse<T>(response);
 
     if (!result.ok) {
-      if (fallback) {
+      if (fallback && isDevFallbackEnabled()) {
         return {
           ok: true,
           data: fallback(),
@@ -82,8 +91,8 @@ export async function adminMutate<T>(
     }
 
     return result;
-  } catch {
-    if (fallback) {
+  } catch (error) {
+    if (fallback && isDevFallbackEnabled()) {
       return {
         ok: true,
         data: fallback(),
@@ -94,8 +103,8 @@ export async function adminMutate<T>(
 
     return {
       ok: false,
-      source: "fallback",
-      error: "Unable to reach the server.",
+      source: "api",
+      error: error instanceof Error ? error.message : "Unable to reach the server.",
     };
   }
 }

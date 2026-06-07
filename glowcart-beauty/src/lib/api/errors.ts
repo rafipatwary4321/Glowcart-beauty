@@ -1,3 +1,5 @@
+import { DbConnectionError } from "@/lib/db";
+
 export class ApiRouteError extends Error {
   status: number;
   details?: unknown;
@@ -25,6 +27,10 @@ export function getErrorMessage(error: unknown): string {
 export function getErrorStatus(error: unknown): number {
   if (error instanceof ApiRouteError) {
     return error.status;
+  }
+
+  if (error instanceof DbConnectionError) {
+    return 503;
   }
 
   return 500;

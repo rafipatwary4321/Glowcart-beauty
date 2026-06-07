@@ -1,3 +1,4 @@
+import { env } from "@/config/env";
 import { connectDB } from "@/lib/db";
 import { User, type UserDocument } from "@/models/User";
 import type { UserRole } from "@/types/user";
@@ -118,8 +119,8 @@ export async function findOrCreateOAuthUser(
 export async function ensureAdminSeedUser(): Promise<void> {
   await connectDB();
 
-  const adminEmail = process.env.ADMIN_SEED_EMAIL ?? "admin@glowcart.com";
-  const adminPassword = process.env.ADMIN_SEED_PASSWORD ?? "admin1234";
+  const adminEmail = env.adminEmail;
+  const adminPassword = env.adminPassword;
 
   const existing = await User.findOne({ email: adminEmail.toLowerCase() });
 
@@ -132,7 +133,7 @@ export async function ensureAdminSeedUser(): Promise<void> {
   }
 
   await User.create({
-    name: process.env.ADMIN_SEED_NAME ?? "GlowCart Admin",
+    name: env.adminName,
     email: adminEmail.toLowerCase(),
     password: adminPassword,
     role: "admin",

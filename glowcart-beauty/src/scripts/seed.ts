@@ -5,9 +5,14 @@
  *   npm run seed
  *   npm run seed:fresh
  *
- * Requires MONGODB_URI in .env.local or environment.
+ * Requires MONGODB_URI in .env.local (loaded automatically).
  */
-import { connectDB } from "@/lib/db";
+import { loadEnvConfig } from "@next/env";
+
+loadEnvConfig(process.cwd());
+
+import { env } from "@/config/env";
+import { connectDB, DbConnectionError } from "@/lib/db";
 import { ensureAdminSeedUser } from "@/lib/auth/user-service";
 import {
   Banner,
@@ -26,6 +31,18 @@ import { featuredPromotion } from "@/data/promotions";
 import { heroContent } from "@/data/hero";
 
 const shouldFreshSeed = process.argv.includes("--fresh");
+
+function logSuccess(message: string) {
+  console.log(`[seed] OK  ${message}`);
+}
+
+function logInfo(message: string) {
+  console.log(`[seed]     ${message}`);
+}
+
+function logError(message: string) {
+  console.error(`[seed] FAIL ${message}`);
+}
 
 async function clearCollections() {
   await Promise.all([
@@ -56,12 +73,12 @@ async function seedUsers() {
   }
 
   const users = await User.find({
-    email: { $in: ["demo@glowcart.com", "admin@glowcart.com"] },
+    email: { $in: [demoEmail, env.adminEmail.toLowerCase()] },
   });
 
-  console.log(`Seeded ${users.length} auth users (admin + demo customer).`);
-  console.log("Admin login: admin@glowcart.com / admin1234");
-  console.log("Demo customer: demo@glowcart.com / demo1234");
+  logSuccess(`Seeded ${users.length} users (admin + demo customer).`);
+  logInfo(`Admin login: ${env.adminEmail} / ${env.adminPassword}`);
+  logInfo("Demo customer: demo@glowcart.com / demo1234");
   return users;
 }
 
@@ -77,7 +94,7 @@ async function seedCategories() {
     }))
   );
 
-  console.log(`Seeded ${categories.length} categories.`);
+  logSuccess(`Seeded ${categories.length} categories.`);
   return categories;
 }
 
@@ -93,7 +110,7 @@ async function seedBrands() {
     }))
   );
 
-  console.log(`Seeded ${brands.length} brands.`);
+  logSuccess(`Seeded ${brands.length} brands.`);
   return brands;
 }
 
@@ -134,7 +151,7 @@ async function seedProducts(
   });
 
   const inserted = await Product.insertMany(productDocs);
-  console.log(`Seeded ${inserted.length} products.`);
+  logSuccess(`Seeded ${inserted.length} products.`);
   return inserted;
 }
 
@@ -158,7 +175,7 @@ async function seedCoupons() {
     },
   ]);
 
-  console.log(`Seeded ${coupons.length} coupons.`);
+  logSuccess(`Seeded ${coupons.length} coupons.`);
   return coupons;
 }
 
@@ -187,7 +204,7 @@ async function seedBanners() {
     },
   ]);
 
-  console.log(`Seeded ${banners.length} banners.`);
+  logSuccess(`Seeded ${banners.length} homepage banners.`);
   return banners;
 }
 
@@ -224,7 +241,7 @@ async function seedSampleOrder(userId: string, productId: string) {
     },
   });
 
-  console.log("Seeded 1 sample order.");
+  logSuccess("Seeded 1 sample order.");
 }
 
 async function seedSampleReview(userId: string, productId: string) {
@@ -237,29 +254,35 @@ async function seedSampleReview(userId: string, productId: string) {
     verified: true,
   });
 
-  console.log("Seeded 1 sample review.");
+  logSuccess("Seeded 1 sample review.");
 }
 
 async function main() {
-  if (!process.env.MONGODB_URI) {
-    throw new Error("MONGODB_URI is not set. Add it to .env.local before seeding.");
+  console.log("");
+  console.log("[seed] GlowCart Beauty — database seed");
+  console.log("[seed] --------------------------------");
+
+  if (!env.mongodbUri) {
+    throw new DbConnectionError(
+      "MONGODB_URI is not set. Add it to .env.local before seeding."
+    );
   }
 
   await connectDB();
-
-  if (shouldFreshSeed) {
-    console.log("Clearing existing collections...");
-    await clearCollections();
-  }
+  logSuccess("Connected to MongoDB.");
 
   const existingProducts = await Product.countDocuments();
+
   if (existingProducts > 0 && !shouldFreshSeed) {
-    console.log("Database already contains data. Run with --fresh to reseed.");
+    logInfo("Database already contains data. Run `npm run seed:fresh` to reseed.");
+    console.log("");
     process.exit(0);
   }
 
-  if (existingProducts > 0 && shouldFreshSeed) {
+  if (shouldFreshSeed && existingProducts > 0) {
+    logInfo("Clearing existing collections...");
     await clearCollections();
+    logSuccess("Collections cleared.");
   }
 
   const users = await seedUsers();
@@ -281,11 +304,25 @@ async function main() {
     await seedSampleReview(demoUser._id.toString(), firstProduct._id.toString());
   }
 
-  console.log("Seed completed successfully.");
+  console.log("");
+  console.log("[seed] --------------------------------");
+  logSuccess("Seed completed successfully.");
+  console.log("");
   process.exit(0);
 }
 
 main().catch((error) => {
-  console.error("Seed failed:", error);
+  console.log("");
+  console.log("[seed] --------------------------------");
+
+  if (error instanceof DbConnectionError) {
+    logError(error.message);
+  } else if (error instanceof Error) {
+    logError(error.message);
+  } else {
+    logError("An unexpected error occurred.");
+  }
+
+  console.log("");
   process.exit(1);
 });

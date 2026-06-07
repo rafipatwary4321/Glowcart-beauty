@@ -1,9 +1,5 @@
 import { connectDB } from "@/lib/db";
-import {
-  getErrorDetails,
-  getErrorMessage,
-  getErrorStatus,
-} from "@/lib/api/errors";
+import { getErrorDetails, getErrorMessage, getErrorStatus } from "@/lib/api/errors";
 import { apiError } from "@/lib/api/response";
 
 type RouteHandler = (request: Request, context?: unknown) => Promise<Response>;

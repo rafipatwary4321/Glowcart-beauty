@@ -1,4 +1,4 @@
-import { adminGet, adminMutate } from "@/lib/admin/api-client";
+import { adminGet, adminMutate, isDevFallbackEnabled } from "@/lib/admin/api-client";
 import {
   getFallbackBanners,
   getFallbackBrands,
@@ -60,7 +60,9 @@ export async function fetchAdminProduct(id: string) {
       return { data: mapApiProduct(json.data as Record<string, unknown>), source: "api" as const };
     }
   } catch {
-    // fall through to fallback
+    if (!isDevFallbackEnabled()) {
+      throw new Error("Unable to reach the server.");
+    }
   }
 
   const product = getFallbackProductById(id);

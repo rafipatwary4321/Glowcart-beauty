@@ -1,6 +1,5 @@
 /**
  * Typed environment variables.
- * Add validation (e.g. zod) when backend is wired up.
  */
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
@@ -12,6 +11,15 @@ export const env = {
   googleClientId: process.env.GOOGLE_CLIENT_ID ?? process.env.AUTH_GOOGLE_ID ?? "",
   googleClientSecret:
     process.env.GOOGLE_CLIENT_SECRET ?? process.env.AUTH_GOOGLE_SECRET ?? "",
+  adminEmail:
+    process.env.ADMIN_EMAIL ??
+    process.env.ADMIN_SEED_EMAIL ??
+    "admin@glowcart.com",
+  adminPassword:
+    process.env.ADMIN_PASSWORD ??
+    process.env.ADMIN_SEED_PASSWORD ??
+    "admin1234",
+  adminName: process.env.ADMIN_SEED_NAME ?? "GlowCart Admin",
   cloudinaryCloudName:
     process.env.CLOUDINARY_CLOUD_NAME ??
     process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ??
@@ -26,4 +34,8 @@ export const env = {
 
 export function isProduction(): boolean {
   return env.nodeEnv === "production";
+}
+
+export function isDevelopment(): boolean {
+  return env.nodeEnv === "development";
 }
