@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getSession, signIn } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { SocialLogin } from "@/components/auth/social-login";
 import { Button } from "@/components/ui/button";
@@ -24,20 +24,18 @@ export function LoginForm({ googleEnabled = false }: LoginFormProps) {
   const callbackUrl = searchParams.get("callbackUrl");
   const registered = searchParams.get("registered") === "1";
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return window.localStorage.getItem(REMEMBER_EMAIL_KEY) ?? "";
+  });
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return Boolean(window.localStorage.getItem(REMEMBER_EMAIL_KEY));
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const savedEmail = window.localStorage.getItem(REMEMBER_EMAIL_KEY);
-    if (savedEmail) {
-      setEmail(savedEmail);
-      setRememberMe(true);
-    }
-  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { Heart, ShoppingBag, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useHydrated } from "@/hooks/use-hydrated";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/store/cart-store";
@@ -93,11 +93,9 @@ function WishlistEmptyState() {
 
 export function WishlistPageContent() {
   const items = useWishlistStore((s) => s.items);
-  const [mounted, setMounted] = useState(false);
+  const hydrated = useHydrated();
 
-  useEffect(() => setMounted(true), []);
-
-  if (!mounted) {
+  if (!hydrated) {
     return (
       <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (

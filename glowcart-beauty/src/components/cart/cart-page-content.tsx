@@ -1,18 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { CartEmptyState, CartSummary } from "@/components/cart/cart-summary";
 import { CartItemRow } from "@/components/cart/cart-item-row";
+import { useHydrated } from "@/hooks/use-hydrated";
 import { useCartStore } from "@/store/cart-store";
 
 export function CartPageContent() {
   const items = useCartStore((s) => s.items);
-  const [mounted, setMounted] = useState(false);
+  const hydrated = useHydrated();
 
-  useEffect(() => setMounted(true), []);
-
-  if (!mounted) {
+  if (!hydrated) {
     return (
       <div className="animate-pulse space-y-4">
         {[1, 2].map((i) => (

@@ -2,7 +2,6 @@ export const runtime = "nodejs";
 
 import { auth } from "@/auth";
 import { ApiRouteError, apiSuccess, serializeDocument, withDb } from "@/lib/api";
-import { isAdmin } from "@/lib/auth/roles";
 import { isValidObjectId } from "@/lib/db";
 import { appendTrackingEvent } from "@/lib/orders/tracking";
 import { Order } from "@/models";

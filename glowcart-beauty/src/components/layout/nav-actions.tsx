@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Heart, ShoppingBag } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useHydrated } from "@/hooks/use-hydrated";
 import { useCartStore } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
 
@@ -20,11 +20,9 @@ function NavIconBadge({ count }: { count: number }) {
 
 export function NavWishlistButton() {
   const wishlistCount = useWishlistStore((s) => s.getWishlistCount());
-  const [mounted, setMounted] = useState(false);
+  const hydrated = useHydrated();
 
-  useEffect(() => setMounted(true), []);
-
-  const count = mounted ? wishlistCount : 0;
+  const count = hydrated ? wishlistCount : 0;
 
   return (
     <Button
@@ -44,11 +42,9 @@ export function NavWishlistButton() {
 
 export function NavCartButton() {
   const cartCount = useCartStore((s) => s.getCartCount());
-  const [mounted, setMounted] = useState(false);
+  const hydrated = useHydrated();
 
-  useEffect(() => setMounted(true), []);
-
-  const count = mounted ? cartCount : 0;
+  const count = hydrated ? cartCount : 0;
 
   return (
     <Button

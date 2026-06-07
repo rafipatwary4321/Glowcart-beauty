@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Circle, Loader2, Truck } from "lucide-react";
+import { CheckCircle2, Circle, Truck } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 

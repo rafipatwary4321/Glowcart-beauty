@@ -16,7 +16,8 @@ export function serializeDocument<T extends Record<string, unknown>>(
     __v?: number;
   };
 
-  const { _id, __v, ...rest } = plain;
+  const { _id, __v: _version, ...rest } = plain;
+  void _version;
 
   return {
     ...rest,

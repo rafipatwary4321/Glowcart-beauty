@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import {
   AdminDataTable,
   adminFormatCurrency,
-  AdminStatusBadge,
   type AdminTableColumn,
 } from "@/components/admin/admin-data-table";
 import { AdminTableSkeleton } from "@/components/admin/admin-table-skeleton";
@@ -19,14 +18,6 @@ import { mapOrderSummaryToAdminRow } from "@/lib/orders/mappers";
 import { fetchAdminOrders, updateOrderStatus } from "@/lib/orders/service";
 import type { AdminOrderRow } from "@/types/admin";
 import type { OrderStatus, PaymentStatus } from "@/types/order";
-
-const paymentVariant = {
-  pending: "outline",
-  paid: "default",
-  failed: "destructive",
-  cancelled: "outline",
-  refunded: "outline",
-} as const;
 
 function OrderStatusSelect({
   order,
