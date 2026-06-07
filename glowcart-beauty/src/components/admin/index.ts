@@ -24,3 +24,5 @@ export { AdminReviewsTable } from "./admin-reviews-table";
 export { AdminSettingsForm } from "./admin-settings-form";
 export { AdminLowStockCard, AdminRecentOrdersCard } from "./admin-dashboard-tables";
 export { FormField } from "./form-field";
+export { ImageUploadField } from "./image-upload-field";
+export { AdminImagePreview } from "./admin-image-preview";

@@ -5,6 +5,7 @@ const brandSchema = new Schema(
     name: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
     tagline: { type: String, default: "" },
+    imageUrl: { type: String },
     imageGradient: { type: String, default: "from-beige-100 to-nude-100" },
     productCount: { type: Number, default: 0, min: 0 },
     isActive: { type: Boolean, default: true },

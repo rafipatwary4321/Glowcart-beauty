@@ -80,6 +80,7 @@ export async function createAdminProduct(values: ProductFormValues) {
     badge: values.badge || undefined,
     skinConcerns: values.skinConcerns,
     imageGradient: values.imageGradient ?? "from-rose-100 to-pink-50",
+    images: values.images?.length ? values.images : undefined,
   };
 
   return adminMutate<Record<string, unknown>>(
@@ -101,6 +102,7 @@ export async function createAdminProduct(values: ProductFormValues) {
         skinConcerns: values.skinConcerns?.split(",").map((s) => s.trim()).filter(Boolean) ?? [],
         badge: values.badge || undefined,
         imageGradient: values.imageGradient ?? "from-rose-100 to-pink-50",
+        images: values.images,
         isActive: values.isActive,
         updatedAt: new Date().toISOString(),
         categoryId: values.category,
@@ -116,6 +118,7 @@ export async function updateAdminProduct(id: string, values: ProductFormValues) 
     ...values,
     originalPrice: values.originalPrice === "" ? undefined : values.originalPrice,
     badge: values.badge || undefined,
+    images: values.images?.length ? values.images : [],
   };
 
   return adminMutate<Record<string, unknown>>(
@@ -141,6 +144,7 @@ export async function updateAdminProduct(id: string, values: ProductFormValues) 
         stockCount: values.stockCount,
         inStock: values.inStock,
         isActive: values.isActive,
+        images: values.images,
       });
       return updated as unknown as Record<string, unknown>;
     }

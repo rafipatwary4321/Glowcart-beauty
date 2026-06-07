@@ -12,7 +12,9 @@ import {
   type AdminTableColumn,
 } from "@/components/admin/admin-data-table";
 import { AdminTableSkeleton } from "@/components/admin/admin-table-skeleton";
+import { AdminImagePreview } from "@/components/admin/admin-image-preview";
 import { FormField } from "@/components/admin/form-field";
+import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,6 +34,7 @@ const defaultValues: BrandFormValues = {
   name: "",
   slug: "",
   tagline: "",
+  imageUrl: "",
   imageGradient: "from-beige-100 to-nude-100",
   isActive: true,
 };
@@ -67,6 +70,7 @@ export function AdminBrandsSection() {
       name: row.name,
       slug: row.slug,
       tagline: row.tagline,
+      imageUrl: row.imageUrl ?? "",
       imageGradient: row.imageGradient,
       isActive: row.isActive,
     });
@@ -117,7 +121,12 @@ export function AdminBrandsSection() {
       header: "Brand",
       cell: (row) => (
         <div className="flex items-center gap-3">
-          <div className={`size-10 rounded-lg bg-gradient-to-br ${row.imageGradient}`} />
+          <AdminImagePreview
+            imageUrl={row.imageUrl}
+            imageGradient={row.imageGradient}
+            alt={row.name}
+            size="sm"
+          />
           <div>
             <p className="font-medium">{row.name}</p>
             <p className="text-xs text-muted-foreground">{row.tagline}</p>
@@ -148,6 +157,8 @@ export function AdminBrandsSection() {
   ];
 
   const isActive = watch("isActive");
+  const imageUrl = watch("imageUrl") ?? "";
+  const imageGradient = watch("imageGradient") ?? "from-beige-100 to-nude-100";
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -167,6 +178,14 @@ export function AdminBrandsSection() {
             <FormField label="Tagline" htmlFor="tagline" error={errors.tagline?.message}>
               <Textarea id="tagline" {...register("tagline")} />
             </FormField>
+            <ImageUploadField
+              folder="brands"
+              label="Brand logo"
+              description="Square logo works best. Gradient used when empty."
+              value={imageUrl ? [imageUrl] : []}
+              onChange={(urls) => setValue("imageUrl", urls[0] ?? "", { shouldDirty: true })}
+              fallbackGradient={imageGradient}
+            />
             <div className="flex items-center justify-between gap-3">
               <label className="text-sm font-medium">Active</label>
               <Switch checked={isActive} onCheckedChange={(v) => setValue("isActive", v)} />

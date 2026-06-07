@@ -12,7 +12,9 @@ import {
   type AdminTableColumn,
 } from "@/components/admin/admin-data-table";
 import { AdminTableSkeleton } from "@/components/admin/admin-table-skeleton";
+import { AdminImagePreview } from "@/components/admin/admin-image-preview";
 import { FormField } from "@/components/admin/form-field";
+import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -34,6 +36,7 @@ const defaultValues: BannerFormValues = {
   subtitle: "",
   description: "",
   type: "promo",
+  imageUrl: "",
   imageGradient: "from-rose-100 to-pink-50",
   ctaLabel: "",
   ctaHref: "",
@@ -73,6 +76,7 @@ export function AdminBannersSection() {
       subtitle: row.subtitle ?? "",
       description: "",
       type: row.type,
+      imageUrl: row.imageUrl ?? "",
       imageGradient: row.imageGradient,
       ctaLabel: row.ctaLabel ?? "",
       ctaHref: row.ctaHref ?? "",
@@ -126,7 +130,12 @@ export function AdminBannersSection() {
       header: "Banner",
       cell: (row) => (
         <div className="flex items-center gap-3">
-          <div className={`size-12 rounded-lg bg-gradient-to-br ${row.imageGradient}`} />
+          <AdminImagePreview
+            imageUrl={row.imageUrl}
+            imageGradient={row.imageGradient}
+            alt={row.title}
+            size="md"
+          />
           <div>
             <p className="font-medium">{row.title}</p>
             {row.subtitle ? <p className="text-xs text-muted-foreground">{row.subtitle}</p> : null}
@@ -161,6 +170,8 @@ export function AdminBannersSection() {
   ];
 
   const isActive = watch("isActive");
+  const imageUrl = watch("imageUrl") ?? "";
+  const imageGradient = watch("imageGradient") ?? "from-rose-100 to-pink-50";
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -193,6 +204,15 @@ export function AdminBannersSection() {
             <FormField label="CTA link" htmlFor="ctaHref" error={errors.ctaHref?.message}>
               <Input id="ctaHref" className="h-10 rounded-lg" {...register("ctaHref")} />
             </FormField>
+            <ImageUploadField
+              folder="banners"
+              label="Banner image"
+              description="Wide banner artwork. Gradient is used when empty."
+              aspectClassName="aspect-[16/9]"
+              value={imageUrl ? [imageUrl] : []}
+              onChange={(urls) => setValue("imageUrl", urls[0] ?? "", { shouldDirty: true })}
+              fallbackGradient={imageGradient}
+            />
             <div className="flex items-center justify-between gap-3">
               <label className="text-sm font-medium">Active</label>
               <Switch checked={isActive} onCheckedChange={(v) => setValue("isActive", v)} />

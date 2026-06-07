@@ -32,6 +32,12 @@ export const env = {
   bkashAppSecret: process.env.BKASH_APP_SECRET ?? "",
 } as const;
 
+export function isCloudinaryConfigured(): boolean {
+  return Boolean(
+    env.cloudinaryCloudName && env.cloudinaryApiKey && env.cloudinaryApiSecret
+  );
+}
+
 export function isProduction(): boolean {
   return env.nodeEnv === "production";
 }

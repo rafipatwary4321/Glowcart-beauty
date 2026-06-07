@@ -17,6 +17,7 @@ export const productFormSchema = z.object({
   ingredients: z.string().optional(),
   howToUse: z.string().optional(),
   imageGradient: z.string().optional(),
+  images: z.array(z.string()).optional(),
   inStock: z.boolean(),
   isActive: z.boolean(),
 });
@@ -30,6 +31,7 @@ export const categoryFormSchema = z.object({
     .min(2, "Slug is required.")
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens."),
   description: z.string().optional(),
+  imageUrl: z.string().optional(),
   imageGradient: z.string().optional(),
   isActive: z.boolean(),
 });
@@ -43,6 +45,7 @@ export const brandFormSchema = z.object({
     .min(2, "Slug is required.")
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens."),
   tagline: z.string().optional(),
+  imageUrl: z.string().optional(),
   imageGradient: z.string().optional(),
   isActive: z.boolean(),
 });
@@ -54,6 +57,7 @@ export const bannerFormSchema = z.object({
   subtitle: z.string().optional(),
   description: z.string().optional(),
   type: z.enum(["hero", "promo", "announcement"]),
+  imageUrl: z.string().optional(),
   imageGradient: z.string().optional(),
   ctaLabel: z.string().optional(),
   ctaHref: z.string().optional(),

@@ -39,6 +39,7 @@ export function mapApiProduct(item: Record<string, unknown>): AdminProductRow {
       : [],
     badge: item.badge ? String(item.badge) : undefined,
     imageGradient: String(item.imageGradient ?? "from-rose-100 to-pink-50"),
+    images: Array.isArray(item.images) ? item.images.map(String) : undefined,
     isActive: item.isActive !== false,
     updatedAt: String(item.updatedAt ?? item.createdAt ?? new Date().toISOString()),
     categoryId: category?.id,
@@ -53,6 +54,7 @@ export function mapApiCategory(item: Record<string, unknown>): AdminCategoryRow 
     slug: String(item.slug),
     description: String(item.description ?? ""),
     productCount: Number(item.productCount ?? 0),
+    imageUrl: item.imageUrl ? String(item.imageUrl) : undefined,
     imageGradient: String(item.imageGradient ?? "from-rose-100 to-pink-50"),
     isActive: item.isActive !== false,
   };
@@ -65,6 +67,7 @@ export function mapApiBrand(item: Record<string, unknown>): AdminBrandRow {
     slug: String(item.slug),
     tagline: String(item.tagline ?? ""),
     productCount: Number(item.productCount ?? 0),
+    imageUrl: item.imageUrl ? String(item.imageUrl) : undefined,
     imageGradient: String(item.imageGradient ?? "from-beige-100 to-nude-100"),
     isActive: item.isActive !== false,
   };
@@ -78,6 +81,7 @@ export function mapApiBanner(item: Record<string, unknown>): AdminBannerRow {
     type: item.type as AdminBannerRow["type"],
     ctaLabel: item.ctaLabel ? String(item.ctaLabel) : undefined,
     ctaHref: item.ctaHref ? String(item.ctaHref) : undefined,
+    imageUrl: item.imageUrl ? String(item.imageUrl) : undefined,
     imageGradient: String(item.imageGradient ?? "from-rose-100 to-pink-50"),
     sortOrder: Number(item.sortOrder ?? 0),
     isActive: item.isActive !== false,

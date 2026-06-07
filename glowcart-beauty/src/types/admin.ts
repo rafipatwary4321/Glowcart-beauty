@@ -34,6 +34,7 @@ export type AdminProductRow = {
   skinConcerns: string[];
   badge?: string;
   imageGradient: string;
+  images?: string[];
   isActive: boolean;
   updatedAt: string;
 };
@@ -44,6 +45,7 @@ export type AdminCategoryRow = {
   slug: string;
   description: string;
   productCount: number;
+  imageUrl?: string;
   imageGradient: string;
   isActive: boolean;
 };
@@ -54,6 +56,7 @@ export type AdminBrandRow = {
   slug: string;
   tagline: string;
   productCount: number;
+  imageUrl?: string;
   imageGradient: string;
   isActive: boolean;
 };
@@ -75,6 +78,7 @@ export type AdminBannerRow = {
   type: "hero" | "promo" | "announcement";
   ctaLabel?: string;
   ctaHref?: string;
+  imageUrl?: string;
   imageGradient: string;
   sortOrder: number;
   isActive: boolean;
@@ -107,6 +111,8 @@ export type AdminReviewRow = {
 export type AdminWebsiteSettings = {
   websiteName: string;
   tagline: string;
+  logoUrl?: string;
+  faviconUrl?: string;
   logoPlaceholder: string;
   faviconPlaceholder: string;
   footerText: string;

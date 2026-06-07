@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { FormField } from "@/components/admin/form-field";
+import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -44,6 +45,7 @@ const defaultValues: ProductFormValues = {
   ingredients: "",
   howToUse: "",
   imageGradient: "from-rose-100 to-pink-50",
+  images: [],
   inStock: true,
   isActive: true,
 };
@@ -117,6 +119,7 @@ export function AdminProductForm({ mode, productId }: AdminProductFormProps) {
           ingredients: "",
           howToUse: "",
           imageGradient: result.data.imageGradient,
+          images: result.data.images ?? [],
           inStock: result.data.inStock,
           isActive: result.data.isActive,
         });
@@ -167,6 +170,7 @@ export function AdminProductForm({ mode, productId }: AdminProductFormProps) {
 
   const inStock = watch("inStock");
   const isActive = watch("isActive");
+  const images = watch("images") ?? [];
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -228,18 +232,21 @@ export function AdminProductForm({ mode, productId }: AdminProductFormProps) {
         <div className="space-y-6">
           <Card className="border-border/60">
             <CardHeader>
-              <CardTitle>Product Image</CardTitle>
-              <CardDescription>Upload placeholder — Cloudinary integration later.</CardDescription>
+              <CardTitle>Product Images</CardTitle>
+              <CardDescription>
+                Upload product photos. Gradient placeholder is used when no images are uploaded.
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className={`flex aspect-square items-center justify-center rounded-2xl bg-gradient-to-br ${imageGradient}`}>
-                <div className="rounded-xl border border-dashed border-primary/30 bg-background/70 px-4 py-6 text-center">
-                  <p className="text-sm font-medium">Drop image here</p>
-                  <Button type="button" variant="outline" size="sm" className="mt-3 rounded-full" disabled>
-                    Upload image
-                  </Button>
-                </div>
-              </div>
+              <ImageUploadField
+                folder="products"
+                label="Product images"
+                multiple
+                maxFiles={6}
+                value={images}
+                onChange={(urls) => setValue("images", urls, { shouldDirty: true })}
+                fallbackGradient={imageGradient}
+              />
             </CardContent>
           </Card>
 

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
+import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,30 +13,22 @@ import { adminWebsiteSettings } from "@/data/admin";
 
 export function AdminSettingsForm() {
   const [values, setValues] = useState(adminWebsiteSettings);
-  const [saved, setSaved] = useState(false);
 
   function updateField<K extends keyof typeof values>(key: K, value: (typeof values)[K]) {
     setValues((current) => ({ ...current, [key]: value }));
-    setSaved(false);
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSaved(true);
+    toast.success("Settings saved locally. Backend persistence coming soon.");
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {saved ? (
-        <div className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          Settings saved in placeholder mode. Backend persistence coming soon.
-        </div>
-      ) : null}
-
       <Card className="border-border/60">
         <CardHeader>
           <CardTitle>General</CardTitle>
-          <CardDescription>Website identity and branding placeholders.</CardDescription>
+          <CardDescription>Website identity and branding.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
@@ -55,22 +49,26 @@ export function AdminSettingsForm() {
               className="h-10 rounded-lg"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="logo">Logo placeholder</Label>
-            <Input
-              id="logo"
-              value={values.logoPlaceholder}
-              onChange={(e) => updateField("logoPlaceholder", e.target.value)}
-              className="h-10 rounded-lg"
+          <div className="space-y-2 sm:col-span-2">
+            <ImageUploadField
+              folder="settings"
+              label="Website logo"
+              description={`Fallback: ${values.logoPlaceholder}`}
+              aspectClassName="aspect-[3/1]"
+              value={values.logoUrl ? [values.logoUrl] : []}
+              onChange={(urls) => updateField("logoUrl", urls[0])}
+              fallbackGradient="from-rose-100 to-pink-50"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="favicon">Favicon placeholder</Label>
-            <Input
-              id="favicon"
-              value={values.faviconPlaceholder}
-              onChange={(e) => updateField("faviconPlaceholder", e.target.value)}
-              className="h-10 rounded-lg"
+          <div className="space-y-2 sm:col-span-2">
+            <ImageUploadField
+              folder="settings"
+              label="Favicon"
+              description={`Fallback: ${values.faviconPlaceholder}`}
+              aspectClassName="aspect-square max-w-[120px]"
+              value={values.faviconUrl ? [values.faviconUrl] : []}
+              onChange={(urls) => updateField("faviconUrl", urls[0])}
+              fallbackGradient="from-beige-100 to-nude-100"
             />
           </div>
           <div className="space-y-2 sm:col-span-2">
