@@ -1,8 +1,12 @@
 import { ApiRouteError, apiSuccess, serializeDocuments, withDb } from "@/lib/api";
 import { Category } from "@/models";
 
-export const GET = withDb(async () => {
-  const categories = await Category.find({ isActive: true }).sort({
+export const GET = withDb(async (request: Request) => {
+  const { searchParams } = new URL(request.url);
+  const isAdmin = searchParams.get("admin") === "true";
+  const filter = isAdmin ? {} : { isActive: true };
+
+  const categories = await Category.find(filter).sort({
     sortOrder: 1,
     name: 1,
   });

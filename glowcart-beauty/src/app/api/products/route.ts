@@ -1,7 +1,8 @@
 import type { QueryFilter, SortOrder } from "mongoose";
 
-import { ApiRouteError, apiSuccess, serializeDocuments, withDb } from "@/lib/api";
+import { ApiRouteError, apiSuccess, serializeDocument, serializeDocuments, withDb } from "@/lib/api";
 import { buildPaginationMeta, parsePagination } from "@/lib/api/pagination";
+import { isValidObjectId } from "@/lib/db";
 import { Brand, Category, Product } from "@/models";
 import type { ProductDocument } from "@/models/Product";
 
@@ -37,11 +38,60 @@ async function resolveBrandId(slug: string | null): Promise<string | null> {
   return brand._id.toString();
 }
 
+async function resolveCategoryRef(value: unknown): Promise<string> {
+  const raw = String(value);
+
+  if (isValidObjectId(raw)) {
+    const doc = await Category.findById(raw).select("_id").lean();
+    if (!doc) throw new ApiRouteError("Category not found.", 404);
+    return doc._id.toString();
+  }
+
+  const bySlug = await Category.findOne({ slug: raw.toLowerCase() }).select("_id").lean();
+  if (bySlug) return bySlug._id.toString();
+
+  const byName = await Category.findOne({ name: new RegExp(`^${raw}$`, "i") }).select("_id").lean();
+  if (byName) return byName._id.toString();
+
+  throw new ApiRouteError("Category not found.", 404);
+}
+
+async function resolveBrandRef(value: unknown): Promise<string> {
+  const raw = String(value);
+
+  if (isValidObjectId(raw)) {
+    const doc = await Brand.findById(raw).select("_id").lean();
+    if (!doc) throw new ApiRouteError("Brand not found.", 404);
+    return doc._id.toString();
+  }
+
+  const bySlug = await Brand.findOne({ slug: raw.toLowerCase() }).select("_id").lean();
+  if (bySlug) return bySlug._id.toString();
+
+  const byName = await Brand.findOne({ name: new RegExp(`^${raw}$`, "i") }).select("_id").lean();
+  if (byName) return byName._id.toString();
+
+  throw new ApiRouteError("Brand not found.", 404);
+}
+
+function parseSkinConcerns(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map(String);
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
 export const GET = withDb(async (request: Request) => {
   const { searchParams } = new URL(request.url);
-  const pagination = parsePagination(searchParams);
+  const isAdmin = searchParams.get("admin") === "true";
+  const pagination = parsePagination(searchParams, { limit: isAdmin ? 100 : 20 });
 
-  const filter: QueryFilter<ProductDocument> = { isActive: true };
+  const filter: QueryFilter<ProductDocument> = {};
+  if (!isAdmin) filter.isActive = true;
 
   const categoryId = await resolveCategoryId(searchParams.get("category"));
   if (categoryId) filter.category = categoryId;
@@ -89,14 +139,42 @@ export const POST = withDb(async (request: Request) => {
 
   const required = ["name", "slug", "price", "category", "brand"] as const;
   for (const field of required) {
-    if (!body[field]) {
+    if (body[field] === undefined || body[field] === "") {
       throw new ApiRouteError(`Missing required field: ${field}`, 400);
     }
   }
 
-  const product = await Product.create(body);
+  const categoryId = await resolveCategoryRef(body.category);
+  const brandId = await resolveBrandRef(body.brand);
 
-  return apiSuccess(product, {
+  const badge = body.badge ? String(body.badge) : undefined;
+  const validBadge =
+    badge === "Bestseller" || badge === "New" || badge === "Sale" ? badge : undefined;
+
+  const product = await Product.create({
+    name: String(body.name),
+    slug: String(body.slug).toLowerCase(),
+    price: Number(body.price),
+    originalPrice: body.originalPrice ? Number(body.originalPrice) : undefined,
+    category: categoryId,
+    brand: brandId,
+    skinConcerns: parseSkinConcerns(body.skinConcerns),
+    badge: validBadge,
+    imageGradient: body.imageGradient ? String(body.imageGradient) : "from-rose-100 to-pink-50",
+    images: Array.isArray(body.images) ? body.images.map(String) : [],
+    inStock: body.inStock !== false,
+    stockCount: Number(body.stockCount ?? 0),
+    description: body.description ? String(body.description) : "",
+    ingredients: body.ingredients ? String(body.ingredients) : "",
+    howToUse: body.howToUse ? String(body.howToUse) : "",
+    isActive: body.isActive !== false,
+  });
+
+  const populated = await Product.findById(product._id)
+    .populate("category", "name slug")
+    .populate("brand", "name slug");
+
+  return apiSuccess(serializeDocument(populated!), {
     status: 201,
     message: "Product created.",
   });

@@ -25,6 +25,8 @@ export type AdminProductRow = {
   sku: string;
   category: string;
   brand: string;
+  categoryId?: string;
+  brandId?: string;
   price: number;
   originalPrice?: number;
   stockCount: number;

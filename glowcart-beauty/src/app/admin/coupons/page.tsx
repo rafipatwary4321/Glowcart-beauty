@@ -1,4 +1,4 @@
-import { AdminCouponForm, AdminCouponsTable, AdminPageHeader } from "@/components/admin";
+import { AdminCouponsSection, AdminPageHeader } from "@/components/admin";
 
 export default function AdminCouponsPage() {
   return (
@@ -7,10 +7,7 @@ export default function AdminCouponsPage() {
         title="Coupons"
         description="Create and manage discount codes for your store."
       />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <AdminCouponsTable />
-        <AdminCouponForm />
-      </div>
+      <AdminCouponsSection />
     </div>
   );
 }

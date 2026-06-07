@@ -1,4 +1,4 @@
-import { AdminBrandsTable, AdminEntityForm, AdminPageHeader } from "@/components/admin";
+import { AdminBrandsSection, AdminPageHeader } from "@/components/admin";
 
 export default function AdminBrandsPage() {
   return (
@@ -7,10 +7,7 @@ export default function AdminBrandsPage() {
         title="Brands"
         description="Manage the brands featured across your store."
       />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <AdminBrandsTable />
-        <AdminEntityForm entity="brand" />
-      </div>
+      <AdminBrandsSection />
     </div>
   );
 }

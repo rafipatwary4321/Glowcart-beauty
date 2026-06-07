@@ -1,71 +1,30 @@
 import { ApiRouteError, apiSuccess, serializeDocuments, withDb } from "@/lib/api";
 import { Coupon } from "@/models";
 
-function isCouponValid(coupon: {
-  isActive: boolean;
-  startsAt?: Date | null;
-  expiresAt?: Date | null;
-  usageLimit?: number | null;
-  usedCount: number;
-}): boolean {
-  if (!coupon.isActive) return false;
+export const GET = withDb(async (request: Request) => {
+  const { searchParams } = new URL(request.url);
+  const isAdmin = searchParams.get("admin") === "true";
 
-  const now = new Date();
-  if (coupon.startsAt && coupon.startsAt > now) return false;
-  if (coupon.expiresAt && coupon.expiresAt < now) return false;
-  if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) return false;
+  const filter = isAdmin ? {} : { isActive: true };
+  const coupons = await Coupon.find(filter).sort({ createdAt: -1 });
 
-  return true;
-}
-
-export const GET = withDb(async () => {
-  const coupons = await Coupon.find({ isActive: true }).sort({ createdAt: -1 });
-  const activeCoupons = coupons.filter(isCouponValid);
-
-  return apiSuccess(serializeDocuments(activeCoupons));
+  return apiSuccess(serializeDocuments(coupons));
 });
 
 export const POST = withDb(async (request: Request) => {
-  const body = (await request.json()) as {
-    code?: string;
-    orderAmount?: number;
-  };
+  const body = (await request.json()) as Record<string, unknown>;
 
-  if (!body.code?.trim()) {
-    throw new ApiRouteError("Coupon code is required.", 400);
+  if (!body.code || !body.discountType || body.discountValue === undefined) {
+    throw new ApiRouteError("Code, discountType, and discountValue are required.", 400);
   }
 
-  const coupon = await Coupon.findOne({
-    code: body.code.trim().toUpperCase(),
+  const coupon = await Coupon.create({
+    ...body,
+    code: String(body.code).trim().toUpperCase(),
   });
 
-  if (!coupon || !isCouponValid(coupon)) {
-    throw new ApiRouteError("Invalid or expired coupon.", 404);
-  }
-
-  const orderAmount = body.orderAmount ?? 0;
-
-  if (orderAmount < (coupon.minOrderAmount ?? 0)) {
-    throw new ApiRouteError(
-      `Minimum order amount is ৳${coupon.minOrderAmount}.`,
-      400
-    );
-  }
-
-  let discount =
-    coupon.discountType === "percentage"
-      ? (orderAmount * coupon.discountValue) / 100
-      : coupon.discountValue;
-
-  if (coupon.maxDiscountAmount) {
-    discount = Math.min(discount, coupon.maxDiscountAmount);
-  }
-
-  return apiSuccess({
-    code: coupon.code,
-    discountType: coupon.discountType,
-    discountValue: coupon.discountValue,
-    calculatedDiscount: Math.round(discount),
-    minOrderAmount: coupon.minOrderAmount,
+  return apiSuccess(coupon, {
+    status: 201,
+    message: "Coupon created.",
   });
 });

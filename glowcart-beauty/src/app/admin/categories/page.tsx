@@ -1,4 +1,4 @@
-import { AdminCategoriesTable, AdminEntityForm, AdminPageHeader } from "@/components/admin";
+import { AdminCategoriesSection, AdminPageHeader } from "@/components/admin";
 
 export default function AdminCategoriesPage() {
   return (
@@ -7,10 +7,7 @@ export default function AdminCategoriesPage() {
         title="Categories"
         description="Organize products into browsable categories."
       />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <AdminCategoriesTable />
-        <AdminEntityForm entity="category" />
-      </div>
+      <AdminCategoriesSection />
     </div>
   );
 }
