@@ -47,7 +47,9 @@ export function MobileNav({ open, onOpenChange }: MobileNavProps) {
             <User className="size-4" />
             Sign In
           </Button>
-          <Button className="w-full rounded-full">Shop Now</Button>
+          <Button className="w-full rounded-full" asChild>
+            <Link href="/products">Shop Now</Link>
+          </Button>
         </div>
       </SheetContent>
     </Sheet>

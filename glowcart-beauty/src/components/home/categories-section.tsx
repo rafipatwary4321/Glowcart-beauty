@@ -11,7 +11,7 @@ export async function CategoriesSection({ className }: HomeSectionProps) {
       <SectionHeader
         title="Featured Categories"
         subtitle="Explore our curated collections for every beauty ritual"
-        href="/shop"
+        href="/products"
       />
       <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
         {categories.map((category) => (

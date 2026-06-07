@@ -7,5 +7,5 @@ export const featuredPromotion: Promotion = {
   description:
     "Refresh your routine with our bestselling serums, cleansers, and moisturizers. Free shipping on orders over ৳2,000.",
   ctaLabel: "Shop the Sale",
-  ctaHref: "/shop?tag=sale",
+  ctaHref: "/products?sort=discount",
 };

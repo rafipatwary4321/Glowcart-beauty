@@ -7,7 +7,7 @@ import type { Category, EntityCardProps } from "@/types";
 
 export function CategoryCard({ data, className }: EntityCardProps<Category>) {
   return (
-    <Link href={`/shop/${data.slug}`} className={cn("block", className)}>
+    <Link href={`/products?category=${data.slug}`} className={cn("block", className)}>
       <Card className="group overflow-hidden rounded-2xl border-border/60 py-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
         <div className="relative aspect-[4/3] overflow-hidden sm:aspect-[3/4]">
           <div

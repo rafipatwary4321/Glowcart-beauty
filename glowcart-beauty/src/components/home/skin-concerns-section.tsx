@@ -11,7 +11,7 @@ export async function SkinConcernsSection({ className }: HomeSectionProps) {
       <SectionHeader
         title="Shop by Skin Concern"
         subtitle="Targeted solutions for your unique skin needs"
-        href="/shop/skincare"
+        href="/products?category=skincare"
         align="center"
       />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">

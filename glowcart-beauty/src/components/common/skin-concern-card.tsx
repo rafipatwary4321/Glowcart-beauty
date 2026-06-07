@@ -30,7 +30,7 @@ export function SkinConcernCard({
 
   return (
     <Link
-      href={`/shop?concern=${data.slug}`}
+      href={`/products?concern=${data.slug}`}
       className={cn("block", className)}
     >
       <Card className="group h-full overflow-hidden rounded-2xl border-border/60 py-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-lg">

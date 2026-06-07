@@ -71,7 +71,7 @@ export function Footer() {
               {skinConcerns.slice(0, 5).map((concern) => (
                 <li key={concern.id}>
                   <Link
-                    href={`/shop?concern=${concern.slug}`}
+                    href={`/products?concern=${concern.slug}`}
                     className="text-sm text-muted-foreground transition-colors hover:text-primary"
                   >
                     {concern.name}

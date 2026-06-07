@@ -6,8 +6,8 @@ export const heroContent: HeroContent = {
   titleAccent: "everyday radiance",
   description:
     "Premium skincare, makeup, and fragrances — thoughtfully curated for skin that glows and confidence that lasts.",
-  primaryCta: { label: "Shop Collection", href: "/shop" },
-  secondaryCta: { label: "Skincare Essentials", href: "/shop/skincare" },
+  primaryCta: { label: "Shop Collection", href: "/products" },
+  secondaryCta: { label: "Skincare Essentials", href: "/products?category=skincare" },
   stats: [
     { value: "500+", label: "Premium Products" },
     { value: "50K+", label: "Happy Customers" },

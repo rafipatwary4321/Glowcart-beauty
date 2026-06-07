@@ -4,6 +4,7 @@ import { Heart, ShoppingBag, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { calcDiscountPercent } from "@/lib/products/filter-products";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/types";
@@ -14,11 +15,7 @@ type ProductCardProps = {
 };
 
 export function ProductCard({ product, className }: ProductCardProps) {
-  const discount =
-    product.originalPrice &&
-    Math.round(
-      ((product.originalPrice - product.price) / product.originalPrice) * 100
-    );
+  const discount = calcDiscountPercent(product);
 
   return (
     <Card
@@ -28,13 +25,15 @@ export function ProductCard({ product, className }: ProductCardProps) {
       )}
     >
       <div className="relative aspect-[4/5] overflow-hidden">
-        <div
-          className={cn(
-            "absolute inset-0 bg-gradient-to-br transition-transform duration-500 group-hover:scale-105",
-            product.imageGradient
-          )}
-        />
-        {product.badge && (
+        <Link href={`/products/${product.slug}`}>
+          <div
+            className={cn(
+              "absolute inset-0 bg-gradient-to-br transition-transform duration-500 group-hover:scale-105",
+              product.imageGradient
+            )}
+          />
+        </Link>
+        {product.badge && product.inStock && (
           <Badge
             variant="secondary"
             className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-0.5 text-xs font-medium text-foreground backdrop-blur-sm"
@@ -42,29 +41,41 @@ export function ProductCard({ product, className }: ProductCardProps) {
             {product.badge}
           </Badge>
         )}
-        <div className="absolute right-3 top-3 flex flex-col gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          <Button
-            size="icon-sm"
+        {!product.inStock && (
+          <Badge
             variant="secondary"
-            className="rounded-full bg-white/90 shadow-sm backdrop-blur-sm hover:bg-white"
-            aria-label="Add to wishlist"
+            className="absolute left-3 top-3 rounded-full bg-foreground/80 text-background backdrop-blur-sm"
           >
-            <Heart className="size-4" />
-          </Button>
+            Sold out
+          </Badge>
+        )}
+        <div className="absolute right-3 top-3 flex flex-col gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          {!product.inStock ? null : (
+            <Button
+              size="icon-sm"
+              variant="secondary"
+              className="rounded-full bg-white/90 shadow-sm backdrop-blur-sm hover:bg-white"
+              aria-label="Add to wishlist"
+            >
+              <Heart className="size-4" />
+            </Button>
+          )}
         </div>
-        <div className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-          <Button className="w-full rounded-full bg-foreground text-background hover:bg-foreground/90">
-            <ShoppingBag className="size-4" />
-            Add to Cart
-          </Button>
-        </div>
+        {product.inStock && (
+          <div className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+            <Button className="w-full rounded-full bg-foreground text-background hover:bg-foreground/90">
+              <ShoppingBag className="size-4" />
+              Add to Cart
+            </Button>
+          </div>
+        )}
       </div>
       <CardContent className="space-y-2 p-4">
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          {product.category}
+        <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          {product.brand} · {product.category}
         </p>
         <Link
-          href={`/shop/${product.slug}`}
+          href={`/products/${product.slug}`}
           className="line-clamp-2 font-medium text-foreground transition-colors hover:text-primary"
         >
           {product.name}
@@ -76,7 +87,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
             ({product.reviewCount})
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-base font-semibold text-foreground">
             {formatPrice(product.price)}
           </span>
@@ -85,7 +96,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
               <span className="text-sm text-muted-foreground line-through">
                 {formatPrice(product.originalPrice)}
               </span>
-              {discount && (
+              {discount > 0 && (
                 <span className="text-xs font-medium text-rose-600">
                   -{discount}%
                 </span>

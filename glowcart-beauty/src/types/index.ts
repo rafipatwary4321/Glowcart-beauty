@@ -8,7 +8,14 @@ export type {
   Promotion,
   SectionHeaderConfig,
 } from "./homepage";
-export type { Category, Product } from "./product";
+export type {
+  Category,
+  Product,
+  ProductBadge,
+  ProductFilterState,
+  ProductReview,
+  ProductSortOption,
+} from "./product";
 export type { Order, OrderStatus, PaymentMethod } from "./order";
 export type { SkinConcern } from "./skin-concern";
 export type { User, UserRole } from "./user";

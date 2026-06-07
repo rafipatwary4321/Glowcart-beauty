@@ -12,7 +12,7 @@ export async function TrendingProductsSection({ className }: HomeSectionProps) {
       <SectionHeader
         title="Trending Now"
         subtitle="The most-loved products this week"
-        href="/shop?sort=trending"
+        href="/products?sort=trending"
       />
       <ProductGrid products={products} />
     </PageSection>

@@ -17,7 +17,7 @@ export async function TopBrandsSection({ className }: HomeSectionProps) {
       <SectionHeader
         title="Top Brands"
         subtitle="Discover premium beauty houses trusted by thousands"
-        href="/shop/brands"
+        href="/products"
       />
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6">
         {brands.map((brand) => (

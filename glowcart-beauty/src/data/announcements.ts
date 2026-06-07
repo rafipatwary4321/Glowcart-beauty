@@ -4,19 +4,19 @@ export const announcements: Announcement[] = [
   {
     id: "1",
     message: "Free shipping on orders over ৳2,000",
-    href: "/shop",
+    href: "/products",
     linkLabel: "Shop now",
   },
   {
     id: "2",
     message: "New arrivals: Spring Glow Collection is here",
-    href: "/shop?sort=newest",
+    href: "/products?sort=latest",
     linkLabel: "Explore",
   },
   {
     id: "3",
     message: "Get 10% off your first order — use code GLOW10",
-    href: "/shop",
+    href: "/products",
     linkLabel: "Claim offer",
   },
 ];
