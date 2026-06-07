@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BadgePercent,
+  BookOpen,
   Image,
   LayoutDashboard,
   Menu,
@@ -33,6 +34,7 @@ const adminNavItems = [
   { label: "Inventory", href: routes.admin.inventory, icon: PackageSearch },
   { label: "Users", href: routes.admin.users, icon: Users },
   { label: "Banners", href: routes.admin.banners, icon: Image },
+  { label: "Blog", href: routes.admin.blogs, icon: BookOpen },
   { label: "Coupons", href: routes.admin.coupons, icon: BadgePercent },
   { label: "Reviews", href: routes.admin.reviews, icon: Star },
   { label: "Settings", href: routes.admin.settings, icon: Settings },

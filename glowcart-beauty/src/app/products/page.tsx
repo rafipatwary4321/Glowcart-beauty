@@ -3,12 +3,14 @@ import type { Metadata } from "next";
 import { Container } from "@/components/common/container";
 import { ProductListing } from "@/components/product";
 import { productCategories, products } from "@/data/products";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "All Products",
   description:
     "Browse premium skincare, makeup, fragrances, and beauty essentials at GlowCart Beauty.",
-};
+  path: "/products",
+});
 
 type ProductsPageProps = {
   searchParams: Promise<{

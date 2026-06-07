@@ -3,7 +3,7 @@ import { DM_Sans, Playfair_Display } from "next/font/google";
 
 import { LayoutShell } from "@/components/layout/layout-shell";
 import { AppProviders } from "@/providers";
-import { siteConfig } from "@/constants/site-config";
+import { defaultSiteMetadata } from "@/lib/seo";
 
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -20,13 +20,7 @@ const playfair = Playfair_Display({
   weight: ["400", "500", "600", "700"],
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: siteConfig.name,
-    template: `%s | ${siteConfig.name}`,
-  },
-  description: siteConfig.description,
-};
+export const metadata: Metadata = defaultSiteMetadata;
 
 export default function RootLayout({
   children,

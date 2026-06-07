@@ -80,3 +80,22 @@ export const couponFormSchema = z.object({
 });
 
 export type CouponFormValues = z.infer<typeof couponFormSchema>;
+
+export const blogFormSchema = z.object({
+  title: z.string().min(2, "Title is required."),
+  slug: z
+    .string()
+    .min(2, "Slug is required.")
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens."),
+  coverImage: z.string().optional(),
+  excerpt: z.string().optional(),
+  content: z.string().optional(),
+  author: z.string().min(1, "Author is required."),
+  category: z.string().optional(),
+  tags: z.string().optional(),
+  status: z.enum(["draft", "published"]),
+  seoTitle: z.string().optional(),
+  seoDescription: z.string().optional(),
+});
+
+export type BlogFormValues = z.infer<typeof blogFormSchema>;

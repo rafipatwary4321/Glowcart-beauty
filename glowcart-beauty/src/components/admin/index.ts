@@ -22,6 +22,8 @@ export { AdminCouponsSection } from "./admin-coupons-section";
 export { AdminUsersTable } from "./admin-users-table";
 export { AdminReviewsTable } from "./admin-reviews-table";
 export { AdminSettingsForm } from "./admin-settings-form";
+export { AdminBlogsTable } from "./admin-blogs-table";
+export { AdminBlogForm } from "./admin-blog-form";
 export { AdminLowStockCard, AdminRecentOrdersCard } from "./admin-dashboard-tables";
 export { AdminDashboardContent } from "./admin-dashboard-content";
 export { AdminInventorySection } from "./admin-inventory-section";

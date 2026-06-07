@@ -398,6 +398,113 @@ export async function deleteAdminCoupon(id: string) {
   );
 }
 
+function mapApiBlog(row: Record<string, unknown>): import("@/types/admin").AdminBlogRow & {
+  content?: string;
+  tags?: string[];
+  seoTitle?: string;
+  seoDescription?: string;
+} {
+  return {
+    id: String(row.id ?? row._id),
+    title: String(row.title ?? ""),
+    slug: String(row.slug ?? ""),
+    coverImage: row.coverImage ? String(row.coverImage) : undefined,
+    excerpt: String(row.excerpt ?? ""),
+    content: String(row.content ?? ""),
+    author: String(row.author ?? ""),
+    category: String(row.category ?? "Beauty Tips"),
+    tags: Array.isArray(row.tags) ? row.tags.map(String) : [],
+    status: (row.status as "draft" | "published") ?? "draft",
+    seoTitle: row.seoTitle ? String(row.seoTitle) : undefined,
+    seoDescription: row.seoDescription ? String(row.seoDescription) : undefined,
+    publishedAt: row.publishedAt ? String(row.publishedAt) : undefined,
+    updatedAt: String(row.updatedAt ?? new Date().toISOString()),
+  };
+}
+
+export async function fetchAdminBlogs() {
+  const result = await adminGet<{ items: Record<string, unknown>[] }>(
+    `/api/blogs${ADMIN_QUERY}`,
+    () => ({ items: [] })
+  );
+
+  return {
+    ...result,
+    data: result.data.items.map(mapApiBlog),
+  };
+}
+
+export async function fetchAdminBlog(id: string) {
+  const response = await fetch(`/api/blogs/${id}?admin=true`, { cache: "no-store" });
+  const json = await response.json();
+
+  if (!response.ok || !json.success) {
+    throw new Error(json.message ?? "Blog not found.");
+  }
+
+  return { data: mapApiBlog(json.data as Record<string, unknown>), source: "api" as const };
+}
+
+export async function createAdminBlog(values: import("@/lib/admin/schemas").BlogFormValues) {
+  const payload = {
+    ...values,
+    tags: values.tags?.split(",").map((tag) => tag.trim()).filter(Boolean) ?? [],
+    coverImage: values.coverImage || undefined,
+    seoTitle: values.seoTitle || undefined,
+    seoDescription: values.seoDescription || undefined,
+  };
+
+  return adminMutate<Record<string, unknown>>(
+    "/api/blogs",
+    { method: "POST", body: JSON.stringify(payload) },
+    () => payload
+  );
+}
+
+export async function updateAdminBlog(
+  id: string,
+  values: import("@/lib/admin/schemas").BlogFormValues
+) {
+  const payload = {
+    ...values,
+    tags: values.tags?.split(",").map((tag) => tag.trim()).filter(Boolean) ?? [],
+    coverImage: values.coverImage || undefined,
+    seoTitle: values.seoTitle || undefined,
+    seoDescription: values.seoDescription || undefined,
+  };
+
+  return adminMutate<Record<string, unknown>>(
+    `/api/blogs/${id}`,
+    { method: "PUT", body: JSON.stringify(payload) },
+    () => payload
+  );
+}
+
+export async function deleteAdminBlog(id: string) {
+  return adminMutate<{ id: string }>(
+    `/api/blogs/${id}`,
+    { method: "DELETE" },
+    () => ({ id })
+  );
+}
+
+export async function fetchAdminSettings() {
+  const response = await fetch("/api/settings", { cache: "no-store" });
+  const json = await response.json();
+  if (!response.ok || !json.success) {
+    throw new Error(json.message ?? "Unable to load settings.");
+  }
+  return json.data as Record<string, unknown>;
+}
+
+export async function updateAdminSettings(values: Record<string, unknown>) {
+  return adminMutate<Record<string, unknown>>(
+    "/api/settings",
+    { method: "PUT", body: JSON.stringify(values) },
+    () => values
+  );
+}
+
 export type {
   AdminProductRow,
   AdminCategoryRow,

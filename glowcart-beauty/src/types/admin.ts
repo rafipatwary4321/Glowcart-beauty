@@ -112,6 +112,7 @@ export type AdminReviewRow = {
 export type AdminWebsiteSettings = {
   websiteName: string;
   tagline: string;
+  description?: string;
   logoUrl?: string;
   faviconUrl?: string;
   logoPlaceholder: string;
@@ -122,10 +123,27 @@ export type AdminWebsiteSettings = {
   socialPinterest: string;
   contactPhone: string;
   contactEmail: string;
+  contactAddress?: string;
   deliveryCharge: number;
   freeDeliveryThreshold: number;
+  aboutContent?: string;
+  contactContent?: string;
   privacyPolicy: string;
   termsAndConditions: string;
+  returnPolicy?: string;
+};
+
+export type AdminBlogRow = {
+  id: string;
+  title: string;
+  slug: string;
+  coverImage?: string;
+  excerpt: string;
+  author: string;
+  category: string;
+  status: "draft" | "published";
+  publishedAt?: string;
+  updatedAt: string;
 };
 
 export type AdminProductFormValues = {

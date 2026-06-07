@@ -8,6 +8,7 @@ export const UPLOAD_FOLDERS = [
   "brands",
   "categories",
   "settings",
+  "blogs",
 ] as const;
 
 export type UploadFolder = (typeof UPLOAD_FOLDERS)[number];

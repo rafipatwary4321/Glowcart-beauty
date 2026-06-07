@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { ImageUploadField } from "@/components/admin/image-upload-field";
@@ -10,17 +11,108 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { adminWebsiteSettings } from "@/data/admin";
+import { fetchAdminSettings, updateAdminSettings } from "@/lib/admin/services";
+import { notifyMutationResult } from "@/lib/admin/toast";
+import type { AdminWebsiteSettings } from "@/types/admin";
+
+const defaultValues: AdminWebsiteSettings = {
+  ...adminWebsiteSettings,
+  description: "",
+  contactAddress: "",
+  aboutContent: "",
+  contactContent: "",
+  returnPolicy: "",
+};
 
 export function AdminSettingsForm() {
-  const [values, setValues] = useState(adminWebsiteSettings);
+  const [values, setValues] = useState<AdminWebsiteSettings>(defaultValues);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  function updateField<K extends keyof typeof values>(key: K, value: (typeof values)[K]) {
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const data = await fetchAdminSettings();
+        setValues((current) => ({
+          ...current,
+          websiteName: String(data.websiteName ?? current.websiteName),
+          tagline: String(data.tagline ?? current.tagline),
+          description: String(data.description ?? current.description ?? ""),
+          logoUrl: data.logoUrl ? String(data.logoUrl) : current.logoUrl,
+          faviconUrl: data.faviconUrl ? String(data.faviconUrl) : current.faviconUrl,
+          footerText: String(data.footerText ?? current.footerText),
+          socialInstagram: String(data.socialInstagram ?? current.socialInstagram),
+          socialFacebook: String(data.socialFacebook ?? current.socialFacebook),
+          socialPinterest: String(data.socialPinterest ?? current.socialPinterest),
+          contactPhone: String(data.contactPhone ?? current.contactPhone),
+          contactEmail: String(data.contactEmail ?? current.contactEmail),
+          contactAddress: String(data.contactAddress ?? current.contactAddress ?? ""),
+          deliveryCharge: Number(data.deliveryCharge ?? current.deliveryCharge),
+          freeDeliveryThreshold: Number(data.freeDeliveryThreshold ?? current.freeDeliveryThreshold),
+          aboutContent: String(data.aboutContent ?? current.aboutContent ?? ""),
+          contactContent: String(data.contactContent ?? current.contactContent ?? ""),
+          privacyPolicy: String(data.privacyPolicy ?? current.privacyPolicy),
+          termsAndConditions: String(data.termsAndConditions ?? current.termsAndConditions),
+          returnPolicy: String(data.returnPolicy ?? current.returnPolicy ?? ""),
+        }));
+      } catch {
+        toast.message("Using default settings — could not load from server.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    void loadSettings();
+  }, []);
+
+  function updateField<K extends keyof AdminWebsiteSettings>(key: K, value: AdminWebsiteSettings[K]) {
     setValues((current) => ({ ...current, [key]: value }));
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    toast.success("Settings saved locally. Backend persistence coming soon.");
+    setSaving(true);
+
+    const result = await updateAdminSettings({
+      websiteName: values.websiteName,
+      tagline: values.tagline,
+      description: values.description,
+      logoUrl: values.logoUrl,
+      faviconUrl: values.faviconUrl,
+      footerText: values.footerText,
+      socialInstagram: values.socialInstagram,
+      socialFacebook: values.socialFacebook,
+      socialPinterest: values.socialPinterest,
+      contactPhone: values.contactPhone,
+      contactEmail: values.contactEmail,
+      contactAddress: values.contactAddress,
+      deliveryCharge: values.deliveryCharge,
+      freeDeliveryThreshold: values.freeDeliveryThreshold,
+      aboutContent: values.aboutContent,
+      contactContent: values.contactContent,
+      privacyPolicy: values.privacyPolicy,
+      termsAndConditions: values.termsAndConditions,
+      returnPolicy: values.returnPolicy,
+    });
+
+    notifyMutationResult({
+      ok: result.ok,
+      source: result.source,
+      successMessage: "Settings saved.",
+      error: result.error,
+      message: result.message,
+    });
+
+    setSaving(false);
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" />
+        Loading settings...
+      </div>
+    );
   }
 
   return (
@@ -47,6 +139,14 @@ export function AdminSettingsForm() {
               value={values.tagline}
               onChange={(e) => updateField("tagline", e.target.value)}
               className="h-10 rounded-lg"
+            />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="description">Site description (SEO)</Label>
+            <Textarea
+              id="description"
+              value={values.description ?? ""}
+              onChange={(e) => updateField("description", e.target.value)}
             />
           </div>
           <div className="space-y-2 sm:col-span-2">
@@ -106,6 +206,15 @@ export function AdminSettingsForm() {
               className="h-10 rounded-lg"
             />
           </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="contactAddress">Contact address</Label>
+            <Input
+              id="contactAddress"
+              value={values.contactAddress ?? ""}
+              onChange={(e) => updateField("contactAddress", e.target.value)}
+              className="h-10 rounded-lg"
+            />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="instagram">Instagram URL</Label>
             <Input
@@ -131,6 +240,33 @@ export function AdminSettingsForm() {
               value={values.socialPinterest}
               onChange={(e) => updateField("socialPinterest", e.target.value)}
               className="h-10 rounded-lg"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-border/60">
+        <CardHeader>
+          <CardTitle>Marketing Pages</CardTitle>
+          <CardDescription>Edit About, Contact, and policy page content (HTML supported).</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="aboutContent">About page content</Label>
+            <Textarea
+              id="aboutContent"
+              rows={5}
+              value={values.aboutContent ?? ""}
+              onChange={(e) => updateField("aboutContent", e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="contactContent">Contact page content</Label>
+            <Textarea
+              id="contactContent"
+              rows={4}
+              value={values.contactContent ?? ""}
+              onChange={(e) => updateField("contactContent", e.target.value)}
             />
           </div>
         </CardContent>
@@ -165,6 +301,7 @@ export function AdminSettingsForm() {
             <Label htmlFor="privacyPolicy">Privacy policy</Label>
             <Textarea
               id="privacyPolicy"
+              rows={5}
               value={values.privacyPolicy}
               onChange={(e) => updateField("privacyPolicy", e.target.value)}
             />
@@ -173,15 +310,25 @@ export function AdminSettingsForm() {
             <Label htmlFor="terms">Terms and conditions</Label>
             <Textarea
               id="terms"
+              rows={5}
               value={values.termsAndConditions}
               onChange={(e) => updateField("termsAndConditions", e.target.value)}
+            />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="returnPolicy">Return policy</Label>
+            <Textarea
+              id="returnPolicy"
+              rows={5}
+              value={values.returnPolicy ?? ""}
+              onChange={(e) => updateField("returnPolicy", e.target.value)}
             />
           </div>
         </CardContent>
       </Card>
 
-      <Button type="submit" className="rounded-full">
-        Save Settings
+      <Button type="submit" className="rounded-full" disabled={saving}>
+        {saving ? <Loader2 className="size-4 animate-spin" /> : "Save Settings"}
       </Button>
     </form>
   );

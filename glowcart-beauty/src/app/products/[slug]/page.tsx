@@ -13,6 +13,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { getReviewsForProduct } from "@/data/product-reviews";
 import { getProductBySlug, getRelatedProducts } from "@/data/products";
+import { buildPageMetadata } from "@/lib/seo";
 
 type ProductDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -29,10 +30,12 @@ export async function generateMetadata({
   const { slug } = await params;
   const product = getProductBySlug(slug);
   if (!product) return { title: "Product Not Found" };
-  return {
+  return buildPageMetadata({
     title: product.name,
     description: product.description,
-  };
+    path: `/products/${product.slug}`,
+    image: product.images[0],
+  });
 }
 
 export default async function ProductDetailPage({
