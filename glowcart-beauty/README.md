@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GlowCart Beauty
 
-## Getting Started
+Premium cosmetic e-commerce frontend built with Next.js, TypeScript, Tailwind CSS, and ShadCN UI.
 
-First, run the development server:
+## Project location
+
+Run all commands from this folder:
+
+```text
+C:\Cursor\cosmetic shop\glowcart-beauty
+```
+
+## Getting started
+
+Install dependencies (first time only):
+
+```bash
+npm install
+```
+
+Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Production build:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Stop an old dev server
 
-To learn more about Next.js, take a look at the following resources:
+If port 3000 is already in use or you see the default Next.js starter page:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Stop the terminal running `npm run dev` with `Ctrl + C`
+2. Or force-stop all Node processes:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```powershell
+taskkill /F /IM node.exe
+```
 
-## Deploy on Vercel
+3. Restart from the correct folder:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```powershell
+cd "C:\Cursor\cosmetic shop\glowcart-beauty"
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Homepage sections
+
+- Announcement bar
+- Navbar
+- Hero banner
+- Featured categories
+- Top brands
+- Trending products
+- Skin concerns
+- Promotional banner
+- Newsletter
+- Footer
+
+## Commit changes
+
+```powershell
+cd "C:\Cursor\cosmetic shop\glowcart-beauty"
+git add .
+git status
+git commit -m "Your commit message here"
+```
+
+Example:
+
+```powershell
+git commit -m "Fix homepage layout and sync GlowCart Beauty frontend"
+```
+
+## Tech stack
+
+- Next.js 16 (App Router)
+- TypeScript
+- Tailwind CSS v4
+- ShadCN UI
+- Dummy data (no backend yet)
