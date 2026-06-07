@@ -1,4 +1,7 @@
 import { ApiRouteError, apiSuccess, serializeDocuments, withDb } from "@/lib/api";
+
+export const runtime = "nodejs";
+
 import { Banner } from "@/models";
 
 export const GET = withDb(async (request: Request) => {

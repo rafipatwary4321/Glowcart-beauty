@@ -1,11 +1,4 @@
-export const authConfig = {
-  pages: {
-    signIn: "/login",
-    error: "/login",
-  },
-  trustHost: true,
-} as const;
-
+export { authConfig } from "@/auth.config";
 export { hasRole, isAdmin, isCustomer, getUserRole, requireRole } from "./roles";
 export {
   validateLoginForm,

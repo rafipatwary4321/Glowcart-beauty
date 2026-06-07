@@ -4,3 +4,4 @@ export { ApiRouteError, getErrorMessage, getErrorStatus, getErrorDetails } from 
 export { withDb } from "./handler";
 export { serializeDocument, serializeDocuments } from "./serialize";
 export { buildPaginationMeta, parsePagination } from "./pagination";
+export { runtime } from "./runtime";

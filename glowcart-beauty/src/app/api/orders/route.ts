@@ -1,4 +1,7 @@
 import { auth } from "@/auth";
+
+export const runtime = "nodejs";
+
 import { ApiRouteError, apiSuccess, serializeDocument, serializeDocuments, withDb } from "@/lib/api";
 import { buildPaginationMeta, parsePagination } from "@/lib/api/pagination";
 import { isAdmin } from "@/lib/auth/roles";

@@ -1,9 +1,12 @@
+import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 
-import { auth } from "@/auth";
+import { authConfig } from "@/auth.config";
 import { getPostLoginRedirect } from "@/lib/auth/redirect";
 import { isAdminPath, isAuthPath, isProtectedPath } from "@/lib/auth/protected-routes";
 import { routes } from "@/constants/routes";
+
+const { auth } = NextAuth(authConfig);
 
 const authRedirectPath = "/auth/redirect";
 

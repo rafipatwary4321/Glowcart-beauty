@@ -1,4 +1,5 @@
 import { ApiRouteError, apiSuccess, serializeDocument, withDb } from "@/lib/api";
+export const runtime = "nodejs";
 import { isValidObjectId } from "@/lib/db";
 import { Brand, Category, Product } from "@/models";
 

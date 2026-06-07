@@ -3,7 +3,7 @@ import type { Provider } from "next-auth/providers";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
-import { authConfig } from "@/lib/auth";
+import { authConfig } from "@/auth.config";
 import { authenticateUser, findOrCreateOAuthUser, findUserById } from "@/lib/auth/user-service";
 import { connectDB } from "@/lib/db";
 import type { UserRole } from "@/types/user";
@@ -75,12 +75,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   secret: getAuthSecret(),
   providers,
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60,
-    updateAge: 24 * 60 * 60,
-  },
   callbacks: {
+    ...authConfig.callbacks,
     async signIn({ user, account, profile }) {
       if (account?.provider !== "google") {
         return true;

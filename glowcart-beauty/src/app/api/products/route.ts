@@ -1,6 +1,9 @@
 import type { QueryFilter, SortOrder } from "mongoose";
 
 import { ApiRouteError, apiSuccess, serializeDocument, serializeDocuments, withDb } from "@/lib/api";
+
+export const runtime = "nodejs";
+
 import { buildPaginationMeta, parsePagination } from "@/lib/api/pagination";
 import { isValidObjectId } from "@/lib/db";
 import { Brand, Category, Product } from "@/models";

@@ -1,4 +1,7 @@
 import { ApiRouteError, apiSuccess, withDb } from "@/lib/api";
+
+export const runtime = "nodejs";
+
 import { validateLoginForm } from "@/lib/auth/validation";
 import { authenticateUser } from "@/lib/auth/user-service";
 import { getPostLoginRedirect } from "@/lib/auth/redirect";

@@ -1,4 +1,7 @@
 import { ApiRouteError, apiSuccess, withDb } from "@/lib/api";
+
+export const runtime = "nodejs";
+
 import { Coupon } from "@/models";
 
 function isCouponValid(coupon: {

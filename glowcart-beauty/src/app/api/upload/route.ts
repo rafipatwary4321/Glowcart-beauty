@@ -1,4 +1,7 @@
 import { auth } from "@/auth";
+
+export const runtime = "nodejs";
+
 import { ApiRouteError, apiError, apiSuccess } from "@/lib/api";
 import { isAdmin } from "@/lib/auth/roles";
 import {
