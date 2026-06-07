@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Playfair_Display } from "next/font/google";
 
-import { StorefrontLayout } from "@/components/layout";
+import { LayoutShell } from "@/components/layout/layout-shell";
 import { AppProviders } from "@/providers";
 import { siteConfig } from "@/constants/site-config";
 
@@ -40,7 +40,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col">
         <AppProviders>
-          <StorefrontLayout>{children}</StorefrontLayout>
+          <LayoutShell>{children}</LayoutShell>
         </AppProviders>
       </body>
     </html>

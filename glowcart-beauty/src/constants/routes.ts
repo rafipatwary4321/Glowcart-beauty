@@ -16,8 +16,16 @@ export const routes = {
   admin: {
     root: "/admin",
     products: "/admin/products",
+    productsNew: "/admin/products/new",
+    productEdit: (id: string) => `/admin/products/${id}/edit`,
+    categories: "/admin/categories",
+    brands: "/admin/brands",
     orders: "/admin/orders",
-    customers: "/admin/customers",
+    users: "/admin/users",
+    banners: "/admin/banners",
+    coupons: "/admin/coupons",
+    reviews: "/admin/reviews",
     settings: "/admin/settings",
+    customers: "/admin/users",
   },
 } as const;

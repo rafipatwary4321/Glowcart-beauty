@@ -14,6 +14,12 @@ export const authRoutes = [
   routes.resetPassword,
 ] as const;
 
+export const adminRoutePrefix = routes.admin.root;
+
+export function isAdminPath(pathname: string): boolean {
+  return pathname === adminRoutePrefix || pathname.startsWith(`${adminRoutePrefix}/`);
+}
+
 export function isProtectedPath(pathname: string): boolean {
   return protectedRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)

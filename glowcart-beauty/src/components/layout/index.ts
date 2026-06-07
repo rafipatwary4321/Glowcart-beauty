@@ -4,3 +4,4 @@ export { MobileNav } from "./mobile-nav";
 export { Navbar } from "./navbar";
 export { SiteHeader } from "./site-header";
 export { StorefrontLayout } from "./storefront-layout";
+export { LayoutShell } from "./layout-shell";

@@ -14,4 +14,4 @@ export {
   validateForgotPasswordForm,
   validateResetPasswordForm,
 } from "./validation";
-export { protectedRoutes, authRoutes, isProtectedPath, isAuthPath } from "./protected-routes";
+export { protectedRoutes, authRoutes, isProtectedPath, isAuthPath, isAdminPath, adminRoutePrefix } from "./protected-routes";
