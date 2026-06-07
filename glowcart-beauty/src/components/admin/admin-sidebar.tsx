@@ -4,7 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BadgePercent,
+  BarChart3,
   BookOpen,
+  FileSpreadsheet,
   Image,
   LayoutDashboard,
   Menu,
@@ -32,6 +34,8 @@ const adminNavItems = [
   { label: "Brands", href: routes.admin.brands, icon: Store },
   { label: "Orders", href: routes.admin.orders, icon: ShoppingBag },
   { label: "Inventory", href: routes.admin.inventory, icon: PackageSearch },
+  { label: "Analytics", href: routes.admin.analytics, icon: BarChart3 },
+  { label: "Reports", href: routes.admin.reports, icon: FileSpreadsheet },
   { label: "Users", href: routes.admin.users, icon: Users },
   { label: "Banners", href: routes.admin.banners, icon: Image },
   { label: "Blog", href: routes.admin.blogs, icon: BookOpen },

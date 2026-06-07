@@ -28,6 +28,12 @@ export { AdminLowStockCard, AdminRecentOrdersCard } from "./admin-dashboard-tabl
 export { AdminDashboardContent } from "./admin-dashboard-content";
 export { AdminInventorySection } from "./admin-inventory-section";
 export { AdminOrderDetail } from "./admin-order-detail";
+export { AdminAnalyticsContent } from "./analytics/admin-analytics-content";
+export { AdminReportsHub } from "./analytics/admin-reports-hub";
+export { AdminSalesReportContent } from "./analytics/admin-sales-report-content";
+export { AdminOrdersReportContent } from "./analytics/admin-orders-report-content";
+export { AdminProductsReportContent } from "./analytics/admin-products-report-content";
+export { AdminCustomersReportContent } from "./analytics/admin-customers-report-content";
 export { FormField } from "./form-field";
 export { ImageUploadField } from "./image-upload-field";
 export { AdminImagePreview } from "./admin-image-preview";
