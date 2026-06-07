@@ -1,6 +1,5 @@
-import { ProductCard } from "@/components/shared/product-card";
-import { Container } from "@/components/shared/container";
-import { SectionHeader } from "@/components/shared/section-header";
+import { Container, SectionHeader } from "@/components/common";
+import { ProductGrid } from "@/components/product";
 import { bestSellers } from "@/data/dummy";
 
 export function BestSellers() {
@@ -12,11 +11,7 @@ export function BestSellers() {
           subtitle="Customer favorites loved for their results and feel"
           href="/shop?sort=bestsellers"
         />
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-          {bestSellers.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <ProductGrid products={bestSellers} />
       </Container>
     </section>
   );

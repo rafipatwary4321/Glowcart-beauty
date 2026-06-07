@@ -129,7 +129,3 @@ export const newArrivals: Product[] = [
     imageGradient: "from-nude-100 to-pink-50",
   },
 ];
-
-export function formatPrice(amount: number): string {
-  return `৳${amount.toLocaleString("en-BD")}`;
-}

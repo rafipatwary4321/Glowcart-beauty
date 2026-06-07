@@ -5,7 +5,7 @@ import { Menu, Search, ShoppingBag, User } from "lucide-react";
 import { useState } from "react";
 
 import { MobileNav } from "@/components/layout/mobile-nav";
-import { Container } from "@/components/shared/container";
+import { Container } from "@/components/common/container";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/constants/site-config";
 import { cn } from "@/lib/utils";

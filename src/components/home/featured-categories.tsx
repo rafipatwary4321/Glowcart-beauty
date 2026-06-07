@@ -1,6 +1,4 @@
-import { CategoryCard } from "@/components/shared/category-card";
-import { Container } from "@/components/shared/container";
-import { SectionHeader } from "@/components/shared/section-header";
+import { CategoryCard, Container, SectionHeader } from "@/components/common";
 import { featuredCategories } from "@/data/dummy";
 
 export function FeaturedCategories() {
