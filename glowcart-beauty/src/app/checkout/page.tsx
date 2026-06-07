@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
+import { CheckoutPageContent } from "@/components/checkout";
 import { Container } from "@/components/common/container";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const metadata: Metadata = {
   title: "Checkout",
@@ -19,21 +19,12 @@ export default function CheckoutPage() {
           <h1 className="font-heading text-3xl font-medium tracking-tight text-foreground sm:text-4xl">
             Secure Checkout
           </h1>
+          <p className="text-sm text-muted-foreground">
+            Review your details, choose delivery and payment, then place your order.
+          </p>
         </div>
 
-        <Card className="max-w-2xl border-border/60">
-          <CardHeader>
-            <CardTitle>Checkout placeholder</CardTitle>
-            <CardDescription>
-              This route is protected by authentication. Payment and order submission will be
-              implemented in a later phase.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            You are signed in and can access checkout. Delivery address selection, payment
-            methods, and order confirmation UI will be added next.
-          </CardContent>
-        </Card>
+        <CheckoutPageContent />
       </Container>
     </section>
   );

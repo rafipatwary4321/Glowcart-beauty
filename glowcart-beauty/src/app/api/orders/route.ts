@@ -1,27 +1,51 @@
+import { auth } from "@/auth";
 import { ApiRouteError, apiSuccess, serializeDocument, serializeDocuments, withDb } from "@/lib/api";
 import { buildPaginationMeta, parsePagination } from "@/lib/api/pagination";
+import { isAdmin } from "@/lib/auth/roles";
 import { isValidObjectId } from "@/lib/db";
-import { Order, Product } from "@/models";
-
-import type { PaymentMethod } from "@/types/order";
-
-function generateOrderNumber(): string {
-  const suffix = Math.floor(10000 + Math.random() * 90000);
-  return `GC-${suffix}`;
-}
+import { createOrderSchema } from "@/lib/checkout/schemas";
+import {
+  buildOrderPayload,
+  decrementProductStock,
+  generateOrderNumber,
+  incrementCouponUsage,
+} from "@/lib/orders/server";
+import { Order } from "@/models";
 
 export const GET = withDb(async (request: Request) => {
+  const session = await auth();
   const { searchParams } = new URL(request.url);
   const pagination = parsePagination(searchParams, { limit: 10 });
+  const isAdminRequest = searchParams.get("admin") === "true";
+  const mine = searchParams.get("mine") === "true";
+
+  if (isAdminRequest && !isAdmin(session)) {
+    throw new ApiRouteError("Admin access required.", 403);
+  }
+
+  if (!isAdminRequest && !mine && !session?.user?.id) {
+    throw new ApiRouteError("Authentication required.", 401);
+  }
 
   const filter: Record<string, unknown> = {};
 
   const userId = searchParams.get("userId");
-  if (userId) {
-    if (!isValidObjectId(userId)) {
-      throw new ApiRouteError("Invalid userId.", 400);
+  if (isAdminRequest) {
+    if (userId) {
+      if (!isValidObjectId(userId)) {
+        throw new ApiRouteError("Invalid userId.", 400);
+      }
+      filter.user = userId;
     }
-    filter.user = userId;
+  } else if (mine || userId) {
+    const resolvedUserId = mine ? session?.user?.id : userId;
+    if (!resolvedUserId || !isValidObjectId(resolvedUserId)) {
+      throw new ApiRouteError("Valid user session required.", 401);
+    }
+    if (!isAdmin(session) && resolvedUserId !== session?.user?.id) {
+      throw new ApiRouteError("Forbidden.", 403);
+    }
+    filter.user = resolvedUserId;
   }
 
   const status = searchParams.get("status");
@@ -42,93 +66,62 @@ export const GET = withDb(async (request: Request) => {
   });
 });
 
-type CreateOrderItemInput = {
-  productId: string;
-  quantity: number;
-};
-
 export const POST = withDb(async (request: Request) => {
-  const body = (await request.json()) as {
-    userId?: string;
-    items?: CreateOrderItemInput[];
-    paymentMethod?: string;
-    shippingAddress?: Record<string, string>;
-    couponCode?: string;
-    notes?: string;
-  };
+  const session = await auth();
 
-  if (!body.userId || !isValidObjectId(body.userId)) {
-    throw new ApiRouteError("Valid userId is required.", 400);
+  if (!session?.user?.id) {
+    throw new ApiRouteError("Sign in to place an order.", 401);
   }
 
-  if (!body.items?.length) {
-    throw new ApiRouteError("Order must include at least one item.", 400);
+  const body = await request.json();
+  const parsed = createOrderSchema.safeParse(body);
+
+  if (!parsed.success) {
+    throw new ApiRouteError(parsed.error.issues[0]?.message ?? "Invalid order payload.", 400);
   }
 
-  if (!body.paymentMethod) {
-    throw new ApiRouteError("paymentMethod is required.", 400);
-  }
-
-  const paymentMethods: PaymentMethod[] = ["sslcommerz", "bkash", "cod"];
-  if (!paymentMethods.includes(body.paymentMethod as PaymentMethod)) {
-    throw new ApiRouteError("Invalid paymentMethod.", 400);
-  }
-
-  if (!body.shippingAddress?.line1 || !body.shippingAddress.city) {
-    throw new ApiRouteError("Complete shippingAddress is required.", 400);
-  }
-
-  const productIds = body.items.map((item) => item.productId);
-  const products = await Product.find({ _id: { $in: productIds }, isActive: true });
-
-  if (products.length !== body.items.length) {
-    throw new ApiRouteError("One or more products were not found.", 404);
-  }
-
-  const productMap = new Map(products.map((product) => [product._id.toString(), product]));
-
-  const orderItems = body.items.map((item) => {
-    const product = productMap.get(item.productId);
-    if (!product) {
-      throw new ApiRouteError(`Product ${item.productId} not found.`, 404);
-    }
-
-    return {
-      product: product._id,
-      name: product.name,
-      slug: product.slug,
-      quantity: item.quantity,
-      price: product.price,
-      imageGradient: product.imageGradient,
-    };
+  const input = parsed.data;
+  const built = await buildOrderPayload({
+    items: input.items,
+    customerName: input.customerName,
+    customerEmail: input.customerEmail,
+    customerPhone: input.customerPhone,
+    shippingAddress: input.shippingAddress,
+    deliveryMethod: input.deliveryMethod,
+    paymentMethod: input.paymentMethod,
+    couponCode: input.couponCode,
+    notes: input.notes,
   });
-
-  const subtotal = orderItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-  const deliveryFee = subtotal >= 2000 ? 0 : 120;
-  const discount = 0;
-  const total = subtotal - discount + deliveryFee;
 
   const order = await Order.create({
     orderNumber: generateOrderNumber(),
-    user: body.userId,
-    items: orderItems,
-    subtotal,
-    discount,
-    deliveryFee,
-    total,
-    paymentMethod: body.paymentMethod as PaymentMethod,
-    shippingAddress: body.shippingAddress,
-    couponCode: body.couponCode,
-    notes: body.notes,
+    user: session.user.id,
+    customerName: input.customerName.trim(),
+    customerEmail: input.customerEmail.trim().toLowerCase(),
+    customerPhone: input.customerPhone.trim(),
+    items: built.orderItems,
+    subtotal: built.totals.subtotal,
+    discount: built.totals.discount,
+    deliveryFee: built.totals.deliveryCharge,
+    total: built.totals.total,
+    status: built.initialOrderStatus,
+    deliveryMethod: input.deliveryMethod,
+    paymentMethod: input.paymentMethod,
+    paymentStatus: built.initialPaymentStatus,
+    shippingAddress: input.shippingAddress,
+    couponCode: built.couponCode,
+    notes: input.notes?.trim(),
   });
+
+  await decrementProductStock(built.orderItems);
+  await incrementCouponUsage(built.couponId);
 
   const populated = await Order.findById(order._id).populate("user", "name email");
 
   return apiSuccess(serializeDocument(populated!), {
     status: 201,
-    message: "Order created.",
+    message: built.isOnlinePayment
+      ? "Order created. Payment gateway integration coming soon."
+      : "Order placed successfully.",
   });
 });

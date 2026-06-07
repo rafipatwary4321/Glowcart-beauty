@@ -215,6 +215,9 @@ async function seedSampleOrder(userId: string, productId: string) {
   await Order.create({
     orderNumber: "GC-10482",
     user: userId,
+    customerName: "Ayesha Rahman",
+    customerEmail: "demo@glowcart.com",
+    customerPhone: "+880 1712 345678",
     items: [
       {
         product: product._id,
@@ -229,8 +232,10 @@ async function seedSampleOrder(userId: string, productId: string) {
     deliveryFee: 0,
     total: product.price,
     status: "delivered",
+    deliveryMethod: "standard",
     paymentMethod: "cod",
     paymentStatus: "paid",
+    trackingCode: "GC-TRK-10482",
     shippingAddress: {
       name: "Ayesha Rahman",
       phone: "+880 1712 345678",

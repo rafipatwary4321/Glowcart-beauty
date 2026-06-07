@@ -13,7 +13,7 @@ export default function ProfileOrdersPage() {
       <CardHeader>
         <CardTitle>Order history</CardTitle>
         <CardDescription>
-          Placeholder order data until the orders module is connected to the backend.
+          Your recent GlowCart orders. Real orders appear here after checkout.
         </CardDescription>
       </CardHeader>
       <CardContent>

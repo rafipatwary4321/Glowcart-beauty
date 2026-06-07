@@ -4,6 +4,7 @@ export const routes = {
   shop: "/products",
   cart: "/cart",
   wishlist: "/wishlist",
+  orderSuccess: (id: string) => `/order-success/${id}`,
   checkout: "/checkout",
   login: "/login",
   register: "/register",

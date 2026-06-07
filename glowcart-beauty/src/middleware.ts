@@ -16,6 +16,8 @@ export default auth((request) => {
   const isAuthenticated = Boolean(request.auth);
   const userRole = request.auth?.user?.role;
 
+  const isOrderSuccessPath = pathname.startsWith("/order-success/");
+
   if (isAdminPath(pathname)) {
     if (!isAuthenticated) {
       const loginUrl = new URL(routes.login, request.url);
@@ -30,7 +32,7 @@ export default auth((request) => {
     return NextResponse.next();
   }
 
-  if (isProtectedPath(pathname) && !isAuthenticated) {
+  if ((isProtectedPath(pathname) || isOrderSuccessPath) && !isAuthenticated) {
     const loginUrl = new URL(routes.login, request.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
@@ -52,6 +54,7 @@ export const config = {
     "/cart",
     "/wishlist",
     "/checkout",
+    "/order-success/:path*",
     "/login",
     "/register",
     "/forgot-password",

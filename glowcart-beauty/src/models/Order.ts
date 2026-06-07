@@ -1,6 +1,6 @@
 import { Schema, model, models, type InferSchemaType, type Model, type Types } from "mongoose";
 
-import type { OrderStatus, PaymentMethod } from "@/types/order";
+import type { DeliveryMethod, OrderStatus, PaymentMethod } from "@/types/order";
 
 const orderItemSchema = new Schema(
   {
@@ -30,7 +30,14 @@ const orderSchema = new Schema(
   {
     orderNumber: { type: String, required: true, unique: true, index: true },
     user: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    items: { type: [orderItemSchema], required: true, validate: [(v: unknown[]) => v.length > 0, "Order must have items"] },
+    customerName: { type: String, required: true, trim: true },
+    customerEmail: { type: String, required: true, trim: true, lowercase: true },
+    customerPhone: { type: String, required: true, trim: true },
+    items: {
+      type: [orderItemSchema],
+      required: true,
+      validate: [(v: unknown[]) => v.length > 0, "Order must have items"],
+    },
     subtotal: { type: Number, required: true, min: 0 },
     discount: { type: Number, default: 0, min: 0 },
     deliveryFee: { type: Number, default: 0, min: 0 },
@@ -48,9 +55,14 @@ const orderSchema = new Schema(
       default: "pending",
       index: true,
     },
+    deliveryMethod: {
+      type: String,
+      enum: ["standard", "express"] satisfies DeliveryMethod[],
+      default: "standard",
+    },
     paymentMethod: {
       type: String,
-      enum: ["sslcommerz", "bkash", "cod"] satisfies PaymentMethod[],
+      enum: ["cod", "bkash", "nagad", "sslcommerz", "card"] satisfies PaymentMethod[],
       required: true,
     },
     paymentStatus: {
@@ -60,10 +72,19 @@ const orderSchema = new Schema(
     },
     shippingAddress: { type: shippingAddressSchema, required: true },
     couponCode: { type: String, trim: true },
+    trackingCode: { type: String, trim: true },
     notes: { type: String, trim: true },
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+orderSchema.virtual("deliveryCharge").get(function deliveryCharge() {
+  return this.deliveryFee;
+});
+
+orderSchema.virtual("orderStatus").get(function orderStatus() {
+  return this.status;
+});
 
 export type OrderDocument = InferSchemaType<typeof orderSchema> & {
   user: Types.ObjectId;
