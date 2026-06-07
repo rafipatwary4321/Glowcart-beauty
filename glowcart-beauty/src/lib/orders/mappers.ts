@@ -1,5 +1,6 @@
 import type { AdminOrderRow } from "@/types/admin";
 import type { OrderSummary, OrderStatus, PaymentStatus } from "@/types/order";
+import type { TrackingEvent, TrackingStatus } from "@/types/tracking";
 
 type ApiOrderRecord = Record<string, unknown>;
 
@@ -22,6 +23,19 @@ function mapShippingAddress(value: unknown): OrderSummary["shippingAddress"] {
     city: asString(address.city),
     postalCode: asString(address.postalCode),
   };
+}
+
+function mapTrackingEvents(value: unknown): TrackingEvent[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((event) => {
+    const record = event as Record<string, unknown>;
+    return {
+      status: asString(record.status, "pending") as TrackingStatus,
+      note: asString(record.note) || undefined,
+      at: asString(record.at, new Date().toISOString()),
+      createdBy: asString(record.createdBy) || undefined,
+    };
+  });
 }
 
 function mapOrderItems(value: unknown): OrderSummary["items"] {
@@ -70,6 +84,8 @@ export function mapApiOrder(record: ApiOrderRecord): OrderSummary {
     couponCode: asString(record.couponCode) || undefined,
     trackingCode: asString(record.trackingCode) || undefined,
     transactionId: asString(record.transactionId) || undefined,
+    trackingStatus: asString(record.trackingStatus, "pending") as TrackingStatus,
+    trackingEvents: mapTrackingEvents(record.trackingEvents),
     notes: asString(record.notes) || undefined,
     createdAt: asString(record.createdAt, new Date().toISOString()),
     itemCount: items.reduce((count, item) => count + item.quantity, 0),

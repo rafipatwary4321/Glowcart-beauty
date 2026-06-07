@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -12,6 +13,7 @@ import {
 } from "@/components/admin/admin-data-table";
 import { AdminTableSkeleton } from "@/components/admin/admin-table-skeleton";
 import { Select } from "@/components/ui/select";
+import { routes } from "@/constants/routes";
 import { getPaymentMethodLabel } from "@/lib/orders/constants";
 import { mapOrderSummaryToAdminRow } from "@/lib/orders/mappers";
 import { fetchAdminOrders, updateOrderStatus } from "@/lib/orders/service";
@@ -143,7 +145,9 @@ export function AdminOrdersTable() {
       header: "Order",
       cell: (row) => (
         <div>
-          <p className="font-medium">{row.orderNumber}</p>
+          <Link href={routes.admin.orderDetail(row.id)} className="font-medium hover:text-primary">
+            {row.orderNumber}
+          </Link>
           <p className="text-xs text-muted-foreground">
             {new Date(row.createdAt).toLocaleDateString("en-BD")}
           </p>

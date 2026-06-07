@@ -4,6 +4,7 @@ export const runtime = "nodejs";
 
 import { auth } from "@/auth";
 import { validateRegisterForm } from "@/lib/auth/validation";
+import { sendRegistrationEmail } from "@/lib/email";
 import { registerUser } from "@/lib/auth/user-service";
 
 export const POST = withDb(async (request: Request) => {
@@ -32,6 +33,11 @@ export const POST = withDb(async (request: Request) => {
       password: body.password!,
       role: "customer",
     });
+
+    void sendRegistrationEmail({
+      to: user.email,
+      name: user.name,
+    }).catch(() => undefined);
 
     return apiSuccess(
       {

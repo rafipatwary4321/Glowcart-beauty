@@ -1,3 +1,5 @@
+import type { TrackingEvent, TrackingStatus } from "@/types/tracking";
+
 export type OrderStatus =
   | "pending"
   | "confirmed"
@@ -30,8 +32,6 @@ export type OrderItem = {
   imageGradient?: string;
 };
 
-export type Order = OrderSummary;
-
 export type OrderSummary = {
   id: string;
   orderNumber: string;
@@ -51,7 +51,11 @@ export type OrderSummary = {
   couponCode?: string;
   trackingCode?: string;
   transactionId?: string;
+  trackingStatus?: TrackingStatus;
+  trackingEvents?: TrackingEvent[];
   notes?: string;
   createdAt: string;
   itemCount: number;
 };
+
+export type Order = OrderSummary;

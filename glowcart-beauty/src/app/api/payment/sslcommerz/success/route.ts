@@ -11,6 +11,8 @@ import {
   updateOrderPaymentState,
   validateSSLCommerzPayment,
 } from "@/lib/payment";
+import { sendPaymentSuccessEmail } from "@/lib/email";
+import { appendTrackingEvent } from "@/lib/orders/tracking";
 import { Order } from "@/models";
 
 function getCallbackParams(request: Request): URLSearchParams {
@@ -109,6 +111,18 @@ async function handleSuccess(request: Request) {
     });
 
     await fulfillOrderInventory(order);
+    await appendTrackingEvent(order._id.toString(), {
+      status: "confirmed",
+      note: "Payment confirmed",
+    });
+
+    void sendPaymentSuccessEmail({
+      to: order.customerEmail,
+      customerName: order.customerName,
+      orderNumber: order.orderNumber,
+      total: order.total,
+      transactionId: validation.transactionId || tranId || order.transactionId,
+    }).catch(() => undefined);
 
     return NextResponse.redirect(`${appUrl}${routes.orderSuccess(order._id.toString())}`);
   } catch {

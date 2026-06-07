@@ -6,3 +6,5 @@ export { Order, type OrderDocument } from "./Order";
 export { Review, type ReviewDocument } from "./Review";
 export { Coupon, type CouponDocument } from "./Coupon";
 export { Banner, type BannerDocument } from "./Banner";
+export { StockHistory, type StockHistoryDocument } from "./StockHistory";
+export { PasswordResetToken, type PasswordResetTokenDocument } from "./PasswordResetToken";

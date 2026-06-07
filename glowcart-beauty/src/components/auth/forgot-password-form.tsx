@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,13 +27,22 @@ export function ForgotPasswordForm() {
     setErrors({});
     setLoading(true);
 
-    /**
-     * Placeholder only — no email is sent until backend auth is implemented.
-     */
-    await new Promise((resolve) => setTimeout(resolve, 600));
-
-    setLoading(false);
-    setSubmitted(true);
+    try {
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const json = await response.json();
+      if (!response.ok || !json.success) {
+        throw new Error(json.error ?? "Unable to send reset link.");
+      }
+      setSubmitted(true);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to send reset link.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (submitted) {
@@ -41,9 +51,6 @@ export function ForgotPasswordForm() {
         <p className="text-sm text-muted-foreground">
           If an account exists for <span className="font-medium text-foreground">{email}</span>,
           you&apos;ll receive a password reset link shortly.
-        </p>
-        <p className="text-xs text-muted-foreground">
-          This is a placeholder flow. Email delivery will be wired up with the backend.
         </p>
         <Button asChild variant="outline" className="w-full rounded-full">
           <Link href={routes.login}>Back to sign in</Link>

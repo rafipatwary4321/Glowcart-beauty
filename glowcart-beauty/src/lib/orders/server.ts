@@ -1,5 +1,6 @@
 import { ApiRouteError } from "@/lib/api/errors";
 import { isValidObjectId } from "@/lib/db";
+import { getAvailableStock, isOutOfStock } from "@/lib/inventory";
 import { calculateOrderTotals } from "@/lib/orders/calculate-totals";
 import type { DeliveryMethodValue, PaymentMethodValue } from "@/lib/orders/constants";
 import { isOnlinePaymentMethod } from "@/lib/orders/constants";
@@ -103,7 +104,7 @@ export async function buildOrderPayload(input: BuildOrderInput) {
   for (const item of input.items) {
     const product = await resolveProduct(item);
 
-    if (!product.inStock || product.stockCount < item.quantity) {
+    if (isOutOfStock(product) || getAvailableStock(product) < item.quantity) {
       throw new ApiRouteError(`${product.name} is out of stock.`, 400);
     }
 
@@ -132,7 +133,7 @@ export async function buildOrderPayload(input: BuildOrderInput) {
   const initialOrderStatus: OrderStatus =
     input.paymentMethod === "cod" ? "confirmed" : "pending";
   const initialPaymentStatus: PaymentStatus = "pending";
-  const shouldFulfillInventory = input.paymentMethod === "cod";
+  const shouldIncrementCoupon = input.paymentMethod === "cod";
 
   return {
     orderItems,
@@ -142,23 +143,11 @@ export async function buildOrderPayload(input: BuildOrderInput) {
     initialOrderStatus,
     initialPaymentStatus,
     isOnlinePayment: isOnlinePaymentMethod(input.paymentMethod),
-    shouldFulfillInventory,
+    shouldIncrementCoupon,
   };
 }
 
 export async function incrementCouponUsage(couponId: unknown) {
   if (!couponId) return;
   await Coupon.findByIdAndUpdate(couponId, { $inc: { usedCount: 1 } });
-}
-
-export async function decrementProductStock(
-  items: Array<{ product: unknown; quantity: number }>
-) {
-  await Promise.all(
-    items.map((item) =>
-      Product.findByIdAndUpdate(item.product, {
-        $inc: { stockCount: -item.quantity },
-      })
-    )
-  );
 }

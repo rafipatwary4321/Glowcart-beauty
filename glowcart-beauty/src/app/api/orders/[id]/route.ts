@@ -3,6 +3,8 @@ export const runtime = "nodejs";
 import { ApiRouteError, apiSuccess, serializeDocument, withDb } from "@/lib/api";
 import { isAdmin } from "@/lib/auth/roles";
 import { isValidObjectId } from "@/lib/db";
+import { commitOrderInventory, releaseOrderInventory } from "@/lib/inventory";
+import { appendTrackingEvent } from "@/lib/orders/tracking";
 import { Order } from "@/models";
 import type { OrderStatus } from "@/types/order";
 import type { Session } from "next-auth";
@@ -93,7 +95,22 @@ export const PATCH = withDb(async (request: Request, context?: unknown) => {
     update.transactionId = body.transactionId.trim() || undefined;
   }
 
-  const order = await Order.findByIdAndUpdate(id, update, {
+  let order = await Order.findById(id);
+  if (!order) {
+    throw new ApiRouteError("Order not found.", 404);
+  }
+
+  if (body.orderStatus === "cancelled" && order.status !== "cancelled") {
+    await releaseOrderInventory(order);
+    await appendTrackingEvent(id, { status: "cancelled", note: "Order cancelled by admin" });
+  }
+
+  if (body.orderStatus === "delivered" && order.status !== "delivered") {
+    await commitOrderInventory(order);
+    await appendTrackingEvent(id, { status: "delivered", note: "Order marked delivered" });
+  }
+
+  order = await Order.findByIdAndUpdate(id, update, {
     new: true,
     runValidators: true,
   }).populate("user", "name email");

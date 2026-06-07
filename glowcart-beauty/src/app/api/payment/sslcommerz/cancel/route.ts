@@ -5,7 +5,9 @@ import { NextResponse } from "next/server";
 import { routes } from "@/constants/routes";
 import { env } from "@/config/env";
 import { withDb } from "@/lib/api";
+import { releaseOrderInventory } from "@/lib/inventory";
 import { updateOrderPaymentState } from "@/lib/payment";
+import { appendTrackingEvent } from "@/lib/orders/tracking";
 import { Order } from "@/models";
 
 async function readCallbackParams(request: Request): Promise<URLSearchParams> {
@@ -49,6 +51,11 @@ async function handleCancel(request: Request) {
         paymentStatus: "cancelled",
         orderStatus: "cancelled",
         paymentGatewayResponse: raw,
+      });
+      await releaseOrderInventory(order);
+      await appendTrackingEvent(order._id.toString(), {
+        status: "cancelled",
+        note: "Payment cancelled by customer",
       });
     }
 

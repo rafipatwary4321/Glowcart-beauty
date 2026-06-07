@@ -1,6 +1,6 @@
 import { ApiRouteError } from "@/lib/api/errors";
-import { incrementCouponUsage, decrementProductStock } from "@/lib/orders/server";
-import { Coupon, Order, Product } from "@/models";
+import { incrementCouponUsage } from "@/lib/orders/server";
+import { Coupon, Order } from "@/models";
 import type { OrderDocument } from "@/models/Order";
 import type { OrderStatus, PaymentStatus } from "@/types/order";
 
@@ -18,17 +18,11 @@ export async function findPayableOrder(orderId: string, userId?: string): Promis
   return order;
 }
 
+/** Marks online payment complete. Stock is reserved at order creation. */
 export async function fulfillOrderInventory(order: OrderDocument): Promise<void> {
   if (order.stockFulfilled) {
     return;
   }
-
-  await decrementProductStock(
-    order.items.map((item) => ({
-      product: item.product,
-      quantity: item.quantity,
-    }))
-  );
 
   if (order.couponCode) {
     const coupon = await Coupon.findOne({ code: order.couponCode });
@@ -38,30 +32,6 @@ export async function fulfillOrderInventory(order: OrderDocument): Promise<void>
   }
 
   order.stockFulfilled = true;
-  await order.save();
-}
-
-export async function restoreOrderInventory(order: OrderDocument): Promise<void> {
-  if (!order.stockFulfilled) {
-    return;
-  }
-
-  await Promise.all(
-    order.items.map((item) =>
-      Product.findByIdAndUpdate(item.product, {
-        $inc: { stockCount: item.quantity },
-      })
-    )
-  );
-
-  if (order.couponCode) {
-    const coupon = await Coupon.findOne({ code: order.couponCode });
-    if (coupon && coupon.usedCount > 0) {
-      await Coupon.findByIdAndUpdate(coupon._id, { $inc: { usedCount: -1 } });
-    }
-  }
-
-  order.stockFulfilled = false;
   await order.save();
 }
 

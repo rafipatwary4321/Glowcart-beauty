@@ -55,9 +55,9 @@ function OrderCard({ order }: { order: OrderSummary }) {
             </span>
           ) : null}
         </div>
-        <Button variant="outline" size="sm" className="rounded-full" asChild>
-          <Link href={routes.orderSuccess(order.id)}>View order</Link>
-        </Button>
+          <Button variant="outline" size="sm" className="rounded-full" asChild>
+            <Link href={routes.profileOrder(order.id)}>View</Link>
+          </Button>
       </CardContent>
     </Card>
   );

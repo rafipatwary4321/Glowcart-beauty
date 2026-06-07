@@ -1,11 +1,5 @@
-import {
-  AdminLowStockCard,
-  AdminPageHeader,
-  AdminRecentOrdersCard,
-  AdminSalesChart,
-  AdminStatCard,
-} from "@/components/admin";
-import { adminDashboardStats } from "@/data/admin";
+import { AdminDashboardContent } from "@/components/admin/admin-dashboard-content";
+import { AdminPageHeader } from "@/components/admin";
 
 export default function AdminDashboardPage() {
   return (
@@ -14,25 +8,7 @@ export default function AdminDashboardPage() {
         title="Dashboard"
         description="Overview of your store performance and recent activity."
       />
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {adminDashboardStats.map((stat) => (
-          <AdminStatCard
-            key={stat.label}
-            label={stat.label}
-            value={stat.value}
-            change={stat.change}
-            trend={stat.trend}
-          />
-        ))}
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <AdminSalesChart />
-        <AdminLowStockCard />
-      </div>
-
-      <AdminRecentOrdersCard />
+      <AdminDashboardContent />
     </div>
   );
 }

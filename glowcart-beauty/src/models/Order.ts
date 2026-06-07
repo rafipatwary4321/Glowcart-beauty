@@ -1,6 +1,30 @@
 import { Schema, model, models, type HydratedDocument, type InferSchemaType, type Model, type Types } from "mongoose";
 
 import type { DeliveryMethod, OrderStatus, PaymentMethod, PaymentStatus } from "@/types/order";
+import type { TrackingEvent, TrackingStatus } from "@/types/tracking";
+
+const trackingEventSchema = new Schema(
+  {
+    status: {
+      type: String,
+      enum: [
+        "pending",
+        "confirmed",
+        "processing",
+        "packed",
+        "shipped",
+        "out_for_delivery",
+        "delivered",
+        "cancelled",
+      ] satisfies TrackingStatus[],
+      required: true,
+    },
+    note: { type: String, trim: true },
+    at: { type: Date, default: Date.now },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User" },
+  },
+  { _id: false }
+);
 
 const orderItemSchema = new Schema(
   {
@@ -72,10 +96,28 @@ const orderSchema = new Schema(
     },
     transactionId: { type: String, trim: true, index: true },
     stockFulfilled: { type: Boolean, default: false },
+    stockReserved: { type: Boolean, default: false },
+    stockCommitted: { type: Boolean, default: false },
     paymentGatewayResponse: { type: Schema.Types.Mixed },
     shippingAddress: { type: shippingAddressSchema, required: true },
     couponCode: { type: String, trim: true },
     trackingCode: { type: String, trim: true },
+    trackingStatus: {
+      type: String,
+      enum: [
+        "pending",
+        "confirmed",
+        "processing",
+        "packed",
+        "shipped",
+        "out_for_delivery",
+        "delivered",
+        "cancelled",
+      ] satisfies TrackingStatus[],
+      default: "pending",
+      index: true,
+    },
+    trackingEvents: { type: [trackingEventSchema], default: [] },
     notes: { type: String, trim: true },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }

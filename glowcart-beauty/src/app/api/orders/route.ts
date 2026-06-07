@@ -7,13 +7,16 @@ import { buildPaginationMeta, parsePagination } from "@/lib/api/pagination";
 import { isAdmin } from "@/lib/auth/roles";
 import { isValidObjectId } from "@/lib/db";
 import { createOrderSchema } from "@/lib/checkout/schemas";
+import { sendOrderPlacedEmail } from "@/lib/email";
+import { reserveOrderInventory } from "@/lib/inventory";
 import {
   buildOrderPayload,
-  decrementProductStock,
   generateOrderNumber,
   incrementCouponUsage,
 } from "@/lib/orders/server";
+import { getPaymentMethodLabel } from "@/lib/orders/constants";
 import { Order } from "@/models";
+import type { TrackingStatus } from "@/types/tracking";
 
 export const GET = withDb(async (request: Request) => {
   const session = await auth();
@@ -96,6 +99,9 @@ export const POST = withDb(async (request: Request) => {
     notes: input.notes,
   });
 
+  const trackingStatus: TrackingStatus =
+    input.paymentMethod === "cod" ? "confirmed" : "pending";
+
   const order = await Order.create({
     orderNumber: generateOrderNumber(),
     user: session.user.id,
@@ -115,14 +121,33 @@ export const POST = withDb(async (request: Request) => {
     couponCode: built.couponCode,
     notes: input.notes?.trim(),
     stockFulfilled: false,
+    stockReserved: false,
+    stockCommitted: false,
+    trackingStatus,
+    trackingEvents: [
+      {
+        status: trackingStatus,
+        note: "Order placed",
+        at: new Date(),
+      },
+    ],
   });
 
-  if (built.shouldFulfillInventory) {
-    await decrementProductStock(built.orderItems);
+  await reserveOrderInventory(order);
+
+  if (built.shouldIncrementCoupon) {
     await incrementCouponUsage(built.couponId);
     order.stockFulfilled = true;
     await order.save();
   }
+
+  void sendOrderPlacedEmail({
+    to: order.customerEmail,
+    customerName: order.customerName,
+    orderNumber: order.orderNumber,
+    total: order.total,
+    paymentMethod: getPaymentMethodLabel(order.paymentMethod),
+  }).catch(() => undefined);
 
   const populated = await Order.findById(order._id).populate("user", "name email");
 

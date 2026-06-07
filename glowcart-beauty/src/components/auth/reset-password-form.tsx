@@ -1,14 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { routes } from "@/constants/routes";
 import { validateResetPasswordForm } from "@/lib/auth/validation";
 
-export function ResetPasswordForm() {
+function ResetPasswordFormInner() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token") ?? "";
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -24,24 +29,36 @@ export function ResetPasswordForm() {
       return;
     }
 
+    if (!token) {
+      toast.error("Reset token is missing or invalid.");
+      return;
+    }
+
     setErrors({});
     setLoading(true);
 
-    /**
-     * Placeholder only — token validation and password update come with backend auth.
-     */
-    await new Promise((resolve) => setTimeout(resolve, 600));
-
-    setLoading(false);
-    setSubmitted(true);
+    try {
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password, confirmPassword }),
+      });
+      const json = await response.json();
+      if (!response.ok || !json.success) {
+        throw new Error(json.error ?? "Unable to reset password.");
+      }
+      setSubmitted(true);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to reset password.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (submitted) {
     return (
       <div className="space-y-4 text-center">
-        <p className="text-sm text-muted-foreground">
-          Your password has been updated in this placeholder flow.
-        </p>
+        <p className="text-sm text-muted-foreground">Your password has been updated.</p>
         <Button asChild className="w-full rounded-full">
           <Link href={routes.login}>Continue to sign in</Link>
         </Button>
@@ -89,9 +106,17 @@ export function ResetPasswordForm() {
         ) : null}
       </div>
 
-      <Button type="submit" className="w-full rounded-full" disabled={loading}>
+      <Button type="submit" className="w-full rounded-full" disabled={loading || !token}>
         {loading ? "Updating..." : "Reset Password"}
       </Button>
     </form>
+  );
+}
+
+export function ResetPasswordForm() {
+  return (
+    <Suspense fallback={<p className="text-sm text-muted-foreground">Loading reset form...</p>}>
+      <ResetPasswordFormInner />
+    </Suspense>
   );
 }

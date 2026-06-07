@@ -35,6 +35,11 @@ export const env = {
   bkashPassword: process.env.BKASH_PASSWORD ?? "",
   nagadMerchantId: process.env.NAGAD_MERCHANT_ID ?? "",
   nagadMerchantPrivateKey: process.env.NAGAD_MERCHANT_PRIVATE_KEY ?? "",
+  smtpHost: process.env.SMTP_HOST ?? "",
+  smtpPort: Number(process.env.SMTP_PORT ?? 587),
+  smtpUser: process.env.SMTP_USER ?? "",
+  smtpPass: process.env.SMTP_PASS ?? "",
+  smtpFrom: process.env.SMTP_FROM ?? "",
 } as const;
 
 export function isCloudinaryConfigured(): boolean {
@@ -53,6 +58,10 @@ export function isBkashConfigured(): boolean {
 
 export function isNagadConfigured(): boolean {
   return Boolean(env.nagadMerchantId && env.nagadMerchantPrivateKey);
+}
+
+export function isEmailConfigured(): boolean {
+  return Boolean(env.smtpHost && env.smtpUser && env.smtpPass && env.smtpFrom);
 }
 
 export function isProduction(): boolean {
