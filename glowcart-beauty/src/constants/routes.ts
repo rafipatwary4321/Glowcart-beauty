@@ -7,7 +7,10 @@ export const routes = {
   checkout: "/checkout",
   login: "/login",
   register: "/register",
-  account: "/account",
+  forgotPassword: "/forgot-password",
+  resetPassword: "/reset-password",
+  profile: "/profile",
+  account: "/profile",
   about: "/about",
   contact: "/contact",
   admin: {

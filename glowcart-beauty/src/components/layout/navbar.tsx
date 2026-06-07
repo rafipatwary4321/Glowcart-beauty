@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Search, User } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { useState } from "react";
 
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { NavCartButton, NavWishlistButton } from "@/components/layout/nav-actions";
+import { NavUserMenu } from "@/components/layout/nav-user-menu";
 import { Container } from "@/components/common/container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,9 +69,7 @@ export function Navbar() {
           <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Search">
             <Search className="size-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="hidden sm:inline-flex" aria-label="Account">
-            <User className="size-5" />
-          </Button>
+          <NavUserMenu />
           <NavWishlistButton />
           <NavCartButton />
         </div>
