@@ -1,7 +1,8 @@
 /**
  * Cloudinary upload and image transformation helpers.
  */
-export async function uploadImage(_file: File): Promise<string> {
+export async function uploadImage(file: File): Promise<string> {
+  void file;
   // TODO: implement Cloudinary upload
   throw new Error("Cloudinary not configured");
 }

@@ -1,7 +1,7 @@
 import { Schema, model, models, type HydratedDocument, type InferSchemaType, type Model, type Types } from "mongoose";
 
 import type { DeliveryMethod, OrderStatus, PaymentMethod, PaymentStatus } from "@/types/order";
-import type { TrackingEvent, TrackingStatus } from "@/types/tracking";
+import type { TrackingStatus } from "@/types/tracking";
 
 const trackingEventSchema = new Schema(
   {

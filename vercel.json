@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build --prefix glowcart-beauty",
+  "devCommand": "npm run dev --prefix glowcart-beauty",
+  "installCommand": "npm install --prefix glowcart-beauty",
+  "outputDirectory": "glowcart-beauty/.next"
+}
