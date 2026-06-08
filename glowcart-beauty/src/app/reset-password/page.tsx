@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { AuthLayout, ResetPasswordForm } from "@/components/auth";
 
@@ -13,7 +14,9 @@ export default function ResetPasswordPage() {
       title="Reset your password"
       description="Enter a new password for your account."
     >
-      <ResetPasswordForm />
+      <Suspense fallback={<p className="text-sm text-muted-foreground">Loading...</p>}>
+        <ResetPasswordForm />
+      </Suspense>
     </AuthLayout>
   );
 }
