@@ -12,23 +12,29 @@ import {
 } from "@/components/product";
 import { Separator } from "@/components/ui/separator";
 import { getReviewsForProduct } from "@/data/product-reviews";
-import { getProductBySlug, getRelatedProducts } from "@/data/products";
+import {
+  getPublicProductBySlug,
+  getPublicProducts,
+  getPublicRelatedProducts,
+} from "@/lib/catalog/service";
 import { buildPageMetadata } from "@/lib/seo";
+
+export const revalidate = 60;
 
 type ProductDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
 
 export async function generateStaticParams() {
-  const { products } = await import("@/data/products");
-  return products.map((p) => ({ slug: p.slug }));
+  const products = await getPublicProducts();
+  return products.map((product) => ({ slug: product.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: ProductDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getPublicProductBySlug(slug);
   if (!product) return { title: "Product Not Found" };
   return buildPageMetadata({
     title: product.name,
@@ -42,12 +48,12 @@ export default async function ProductDetailPage({
   params,
 }: ProductDetailPageProps) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getPublicProductBySlug(slug);
 
   if (!product) notFound();
 
   const reviews = getReviewsForProduct(slug);
-  const related = getRelatedProducts(product);
+  const related = await getPublicRelatedProducts(product);
 
   return (
     <div className="bg-gradient-to-b from-rose-50/40 via-white to-beige-50/30">

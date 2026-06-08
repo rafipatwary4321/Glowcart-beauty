@@ -1,6 +1,7 @@
 import { ApiRouteError } from "@/lib/api/errors";
 import { isValidObjectId } from "@/lib/db";
 import { getAvailableStock, isOutOfStock } from "@/lib/inventory";
+import { getSiteSettings } from "@/lib/content/settings-service";
 import { calculateOrderTotals } from "@/lib/orders/calculate-totals";
 import type { DeliveryMethodValue, PaymentMethodValue } from "@/lib/orders/constants";
 import { isOnlinePaymentMethod } from "@/lib/orders/constants";
@@ -124,10 +125,15 @@ export async function buildOrderPayload(input: BuildOrderInput) {
   );
 
   const couponResult = await resolveCouponDiscount(input.couponCode, subtotal);
+  const siteSettings = await getSiteSettings();
   const totals = calculateOrderTotals({
     subtotal,
     discount: couponResult.discount,
     deliveryMethod: input.deliveryMethod,
+    deliveryPricing: {
+      deliveryCharge: siteSettings.deliveryCharge,
+      freeDeliveryThreshold: siteSettings.freeDeliveryThreshold,
+    },
   });
 
   const initialOrderStatus: OrderStatus =

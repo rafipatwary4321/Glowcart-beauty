@@ -13,7 +13,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { topBrands } from "@/data/brands";
 import { skinConcerns } from "@/data/skin-concerns";
 import { priceRange } from "@/data/products";
 import { filterAndSortProducts } from "@/lib/products/filter-products";
@@ -25,6 +24,7 @@ type ProductFiltersProps = {
   filters: ProductFilterState;
   onChange: (filters: ProductFilterState) => void;
   categories: { name: string; slug: string }[];
+  brands: { name: string; slug: string }[];
   className?: string;
   variant?: "sidebar" | "sheet";
 };
@@ -33,6 +33,7 @@ function FilterFields({
   filters,
   onChange,
   categories,
+  brands,
 }: Omit<ProductFiltersProps, "variant" | "className">) {
   const update = (patch: Partial<ProductFilterState>) =>
     onChange({ ...filters, ...patch });
@@ -86,7 +87,7 @@ function FilterFields({
           className="h-9 w-full rounded-full border border-border/60 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-ring/50"
         >
           <option value="">All brands</option>
-          {topBrands.map((b) => (
+          {brands.map((b) => (
             <option key={b.slug} value={b.slug}>
               {b.name}
             </option>
@@ -162,6 +163,7 @@ export function ProductFilters({
   filters,
   onChange,
   categories,
+  brands,
   className,
   variant = "sidebar",
 }: ProductFiltersProps) {
@@ -183,6 +185,7 @@ export function ProductFilters({
               filters={filters}
               onChange={onChange}
               categories={categories}
+              brands={brands}
             />
           </div>
         </SheetContent>
@@ -202,6 +205,7 @@ export function ProductFilters({
         filters={filters}
         onChange={onChange}
         categories={categories}
+        brands={brands}
       />
     </aside>
   );
@@ -220,12 +224,14 @@ const defaultFilters: ProductFilterState = {
 type ProductListingProps = {
   products: Product[];
   categories: { name: string; slug: string }[];
+  brands: { name: string; slug: string }[];
   initialFilters?: Partial<ProductFilterState>;
 };
 
 export function ProductListing({
   products,
   categories,
+  brands,
   initialFilters = {},
 }: ProductListingProps) {
   const [filters, setFilters] = useState<ProductFilterState>({
@@ -272,6 +278,7 @@ export function ProductListing({
             filters={filters}
             onChange={setFilters}
             categories={categories}
+            brands={brands}
             variant="sheet"
           />
         </div>
@@ -282,6 +289,7 @@ export function ProductListing({
           filters={filters}
           onChange={setFilters}
           categories={categories}
+          brands={brands}
           className="hidden lg:block"
         />
 

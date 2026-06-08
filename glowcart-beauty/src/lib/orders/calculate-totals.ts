@@ -1,6 +1,7 @@
+import type { DeliveryPricing } from "@/lib/cart/calculations";
 import {
   calculateDeliveryCharge,
-  FREE_DELIVERY_THRESHOLD,
+  DEFAULT_DELIVERY_PRICING,
 } from "@/lib/cart/calculations";
 import { EXPRESS_DELIVERY_SURCHARGE, type DeliveryMethodValue } from "@/lib/orders/constants";
 
@@ -8,6 +9,7 @@ export type OrderTotalsInput = {
   subtotal: number;
   discount?: number;
   deliveryMethod?: DeliveryMethodValue;
+  deliveryPricing?: DeliveryPricing;
 };
 
 export type OrderTotals = {
@@ -22,8 +24,9 @@ export function calculateOrderTotals({
   subtotal,
   discount = 0,
   deliveryMethod = "standard",
+  deliveryPricing = DEFAULT_DELIVERY_PRICING,
 }: OrderTotalsInput): OrderTotals {
-  const baseDelivery = calculateDeliveryCharge(subtotal);
+  const baseDelivery = calculateDeliveryCharge(subtotal, deliveryPricing);
   const deliveryCharge =
     deliveryMethod === "express" ? baseDelivery + EXPRESS_DELIVERY_SURCHARGE : baseDelivery;
   const safeDiscount = Math.max(0, Math.min(discount, subtotal));
@@ -34,6 +37,6 @@ export function calculateOrderTotals({
     discount: safeDiscount,
     deliveryCharge,
     total,
-    freeDeliveryThreshold: FREE_DELIVERY_THRESHOLD,
+    freeDeliveryThreshold: deliveryPricing.freeDeliveryThreshold,
   };
 }

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { products } from "@/data/products";
+import { getPublicProducts } from "@/lib/catalog/service";
 import { getPublishedBlogs } from "@/lib/blog/service";
 import { getSiteUrl } from "@/lib/seo";
 import { connectDB } from "@/lib/db";
@@ -19,9 +19,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/return-policy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
   ];
 
+  const products = await getPublicProducts();
   const productPages: MetadataRoute.Sitemap = products.map((product) => ({
     url: `${base}/products/${product.slug}`,
-    lastModified: new Date(),
+    lastModified: new Date(product.createdAt),
     changeFrequency: "weekly",
     priority: 0.8,
   }));

@@ -8,20 +8,22 @@ import { Separator } from "@/components/ui/separator";
 import {
   calculateDeliveryCharge,
   calculateGrandTotal,
-  FREE_DELIVERY_THRESHOLD,
 } from "@/lib/cart/calculations";
 import { formatPrice } from "@/lib/format";
+import { useDeliveryPricing } from "@/providers/store-settings-provider";
 import { useCartStore } from "@/store/cart-store";
 
 export function CartSummary() {
   const items = useCartStore((s) => s.items);
   const subtotal = useCartStore((s) => s.calculateSubtotal());
   const clearCart = useCartStore((s) => s.clearCart);
+  const deliveryPricing = useDeliveryPricing();
 
   if (items.length === 0) return null;
 
-  const delivery = calculateDeliveryCharge(subtotal);
-  const grandTotal = calculateGrandTotal(subtotal);
+  const delivery = calculateDeliveryCharge(subtotal, deliveryPricing);
+  const grandTotal = calculateGrandTotal(subtotal, deliveryPricing);
+  const { freeDeliveryThreshold } = deliveryPricing;
 
   return (
     <div className="rounded-2xl border border-border/60 bg-white p-6 shadow-sm lg:sticky lg:top-28">
@@ -44,9 +46,9 @@ export function CartSummary() {
             )}
           </span>
         </div>
-        {subtotal > 0 && subtotal < FREE_DELIVERY_THRESHOLD && (
+        {subtotal > 0 && subtotal < freeDeliveryThreshold && (
           <p className="text-xs text-muted-foreground">
-            Add {formatPrice(FREE_DELIVERY_THRESHOLD - subtotal)} more for free
+            Add {formatPrice(freeDeliveryThreshold - subtotal)} more for free
             delivery
           </p>
         )}

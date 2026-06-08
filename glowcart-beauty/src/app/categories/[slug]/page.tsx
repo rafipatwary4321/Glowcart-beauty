@@ -3,45 +3,25 @@ import { notFound } from "next/navigation";
 
 import { Container } from "@/components/common/container";
 import { ProductListing } from "@/components/product";
-import { featuredCategories } from "@/data/categories";
-import { products } from "@/data/products";
-import { connectDB } from "@/lib/db";
+import {
+  getPublicBrands,
+  getPublicCategories,
+  getPublicCategoryBySlug,
+  getPublicProductsByCategorySlug,
+  toBrandOptions,
+  toCategoryOptions,
+} from "@/lib/catalog/service";
 import { buildPageMetadata } from "@/lib/seo";
-import { Category } from "@/models";
+
+export const revalidate = 60;
 
 type CategoryPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-async function getCategory(slug: string) {
-  try {
-    await connectDB();
-    const category = await Category.findOne({ slug: slug.toLowerCase(), isActive: true });
-    if (category) {
-      return {
-        name: category.name,
-        slug: category.slug,
-        description: category.description || `Shop ${category.name} at GlowCart Beauty.`,
-        imageUrl: category.imageUrl,
-      };
-    }
-  } catch {
-    // fallback below
-  }
-
-  const fallback = featuredCategories.find((item) => item.slug === slug);
-  if (!fallback) return null;
-
-  return {
-    name: fallback.name,
-    slug: fallback.slug,
-    description: fallback.description,
-  };
-}
-
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const category = await getCategory(slug);
+  const category = await getPublicCategoryBySlug(slug);
   if (!category) return { title: "Category Not Found" };
 
   return buildPageMetadata({
@@ -54,17 +34,14 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params;
-  const category = await getCategory(slug);
+  const category = await getPublicCategoryBySlug(slug);
   if (!category) notFound();
 
-  const filtered = products.filter(
-    (product) => product.categorySlug === category.slug || product.category.toLowerCase().replace(/\s+/g, "-") === category.slug
-  );
-
-  const categories = featuredCategories.map((item) => ({
-    name: item.name,
-    slug: item.slug,
-  }));
+  const [products, categories, brands] = await Promise.all([
+    getPublicProductsByCategorySlug(category.slug),
+    getPublicCategories(),
+    getPublicBrands(),
+  ]);
 
   return (
     <section className="bg-beige-50/30 py-14 sm:py-16 lg:py-20">
@@ -77,8 +54,9 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">{category.description}</p>
         </div>
         <ProductListing
-          products={filtered.length ? filtered : products}
-          categories={categories}
+          products={products}
+          categories={toCategoryOptions(categories)}
+          brands={toBrandOptions(brands)}
           initialFilters={{ category: category.slug, brand: "", skinConcern: "", sort: "latest" }}
         />
       </Container>

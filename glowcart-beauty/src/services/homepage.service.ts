@@ -1,15 +1,28 @@
+import {
+  getPublicBrands,
+  getPublicCategories,
+  getPublicHeroContent,
+  getPublicPromoContent,
+} from "@/lib/catalog/service";
 import type { Brand } from "@/types/brand";
 import type { Category } from "@/types/product";
+import type { HeroContent, Promotion } from "@/types/homepage";
 import type { SkinConcern } from "@/types/skin-concern";
 
 export async function getFeaturedCategories(): Promise<Category[]> {
-  const { featuredCategories } = await import("@/data/categories");
-  return featuredCategories;
+  return getPublicCategories();
 }
 
 export async function getTopBrands(): Promise<Brand[]> {
-  const { topBrands } = await import("@/data/brands");
-  return topBrands;
+  return getPublicBrands();
+}
+
+export async function getHeroContent(): Promise<HeroContent> {
+  return getPublicHeroContent();
+}
+
+export async function getPromoContent(): Promise<Promotion> {
+  return getPublicPromoContent();
 }
 
 export async function getSkinConcerns(): Promise<SkinConcern[]> {

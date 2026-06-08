@@ -6,15 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/constants/site-config";
+import type { PublicSiteSettings } from "@/lib/content/settings-service";
 import { skinConcerns } from "@/data/skin-concerns";
 
-const socialLinks = [
-  { label: "IG", href: siteConfig.social.instagram },
-  { label: "FB", href: siteConfig.social.facebook },
-  { label: "PIN", href: siteConfig.social.pinterest },
-];
+type FooterProps = {
+  settings: PublicSiteSettings;
+};
 
-export function Footer() {
+export function Footer({ settings }: FooterProps) {
+  const socialLinks = [
+    { label: "IG", href: settings.socialInstagram },
+    { label: "FB", href: settings.socialFacebook },
+    { label: "PIN", href: settings.socialPinterest },
+  ].filter((link) => Boolean(link.href));
+
   return (
     <footer className="border-t border-border/60 bg-gradient-to-b from-beige-50 to-rose-50/30">
       <Container as="div" className="py-12 lg:py-16">
@@ -22,11 +27,11 @@ export function Footer() {
           <div className="space-y-4 sm:col-span-2 lg:col-span-4">
             <Link href="/" className="inline-block">
               <span className="font-heading text-xl font-semibold text-foreground">
-                {siteConfig.name}
+                {settings.websiteName}
               </span>
             </Link>
             <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-              {siteConfig.description}
+              {settings.footerText || settings.description}
             </p>
             <div className="flex gap-2">
               {socialLinks.map(({ label, href }) => (
@@ -39,9 +44,11 @@ export function Footer() {
                   {label}
                 </Link>
               ))}
-              <span className="flex size-9 items-center justify-center rounded-full border border-border/60 bg-white text-muted-foreground">
-                <Share2 className="size-4" />
-              </span>
+              {socialLinks.length === 0 ? (
+                <span className="flex size-9 items-center justify-center rounded-full border border-border/60 bg-white text-muted-foreground">
+                  <Share2 className="size-4" />
+                </span>
+              ) : null}
             </div>
           </div>
 
@@ -126,16 +133,16 @@ export function Footer() {
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
               <span className="inline-flex items-center gap-1.5">
                 <Mail className="size-3.5 shrink-0" />
-                {siteConfig.contact.email}
+                {settings.contactEmail}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Phone className="size-3.5 shrink-0" />
-                {siteConfig.contact.phone}
+                {settings.contactPhone}
               </span>
             </div>
             <span className="inline-flex items-center gap-1.5">
               <MapPin className="size-3.5 shrink-0" />
-              {siteConfig.contact.address}
+              {settings.contactAddress}
             </span>
           </div>
 
@@ -154,14 +161,17 @@ export function Footer() {
 
         <div className="mt-8 flex flex-col gap-2 border-t border-border/40 pt-6 text-xs text-muted-foreground sm:flex-row sm:justify-between">
           <p>
-            &copy; {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
+            &copy; {new Date().getFullYear()} {settings.websiteName}. All rights reserved.
           </p>
           <div className="flex gap-4">
-            <Link href="/privacy" className="transition-colors hover:text-foreground">
+            <Link href="/privacy-policy" className="transition-colors hover:text-foreground">
               Privacy
             </Link>
-            <Link href="/terms" className="transition-colors hover:text-foreground">
+            <Link href="/terms-and-conditions" className="transition-colors hover:text-foreground">
               Terms
+            </Link>
+            <Link href="/return-policy" className="transition-colors hover:text-foreground">
+              Returns
             </Link>
           </div>
         </div>

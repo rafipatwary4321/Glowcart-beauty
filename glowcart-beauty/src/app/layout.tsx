@@ -3,7 +3,8 @@ import { DM_Sans, Playfair_Display } from "next/font/google";
 
 import { LayoutShell } from "@/components/layout/layout-shell";
 import { AppProviders } from "@/providers";
-import { defaultSiteMetadata } from "@/lib/seo";
+import { getSiteSettings } from "@/lib/content/settings-service";
+import { buildPageMetadata } from "@/lib/seo";
 
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -20,21 +21,31 @@ const playfair = Playfair_Display({
   weight: ["400", "500", "600", "700"],
 });
 
-export const metadata: Metadata = defaultSiteMetadata;
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return buildPageMetadata({
+    title: settings.websiteName,
+    description: settings.description,
+    path: "/",
+    image: settings.logoUrl,
+  });
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await getSiteSettings();
+
   return (
     <html
       lang="en"
       className={cn("h-full antialiased font-sans", dmSans.variable, playfair.variable)}
     >
       <body className="flex min-h-full flex-col">
-        <AppProviders>
-          <LayoutShell>{children}</LayoutShell>
+        <AppProviders settings={settings}>
+          <LayoutShell settings={settings}>{children}</LayoutShell>
         </AppProviders>
       </body>
     </html>

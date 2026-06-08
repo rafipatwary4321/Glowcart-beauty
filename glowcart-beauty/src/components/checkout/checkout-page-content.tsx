@@ -24,6 +24,7 @@ import { formatPrice } from "@/lib/format";
 import { calculateOrderTotals } from "@/lib/orders/calculate-totals";
 import { DELIVERY_METHODS, PAYMENT_METHODS, requiresGatewayRedirect } from "@/lib/orders/constants";
 import { createOrder, validateCheckoutCoupon } from "@/lib/orders/service";
+import { useDeliveryPricing } from "@/providers/store-settings-provider";
 import {
   initBkashPayment,
   initNagadPayment,
@@ -63,6 +64,7 @@ export function CheckoutPageContent() {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
+  const deliveryPricing = useDeliveryPricing();
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutFormSchema),
@@ -119,8 +121,9 @@ export function CheckoutPageContent() {
         subtotal,
         discount: couponDiscount,
         deliveryMethod,
+        deliveryPricing,
       }),
-    [subtotal, couponDiscount, deliveryMethod]
+    [subtotal, couponDiscount, deliveryMethod, deliveryPricing]
   );
 
   async function handleApplyCoupon() {

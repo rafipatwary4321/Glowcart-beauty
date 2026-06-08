@@ -2,8 +2,16 @@ import type { Metadata } from "next";
 
 import { Container } from "@/components/common/container";
 import { ProductListing } from "@/components/product";
-import { productCategories, products } from "@/data/products";
+import {
+  getPublicBrands,
+  getPublicCategories,
+  getPublicProducts,
+  toBrandOptions,
+  toCategoryOptions,
+} from "@/lib/catalog/service";
 import { buildPageMetadata } from "@/lib/seo";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = buildPageMetadata({
   title: "All Products",
@@ -23,13 +31,11 @@ type ProductsPageProps = {
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const params = await searchParams;
-
-  const uniqueCategories = productCategories.map((name) => ({
-    name,
-    slug:
-      products.find((p) => p.category === name)?.categorySlug ??
-      name.toLowerCase().replace(/\s+/g, "-"),
-  }));
+  const [products, categories, brands] = await Promise.all([
+    getPublicProducts(),
+    getPublicCategories(),
+    getPublicBrands(),
+  ]);
 
   return (
     <section className="bg-beige-50/30 py-14 sm:py-16 lg:py-20">
@@ -49,7 +55,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
         <ProductListing
           products={products}
-          categories={uniqueCategories}
+          categories={toCategoryOptions(categories)}
+          brands={toBrandOptions(brands)}
           initialFilters={{
             category: params.category ?? "",
             brand: params.brand ?? "",

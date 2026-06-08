@@ -6,6 +6,7 @@ import {
   ProductGridSkeleton,
   SkinConcernGridSkeleton,
 } from "@/components/home/skeletons";
+import { getHeroContent, getPromoContent } from "@/services/homepage.service";
 
 import { CategoriesSection } from "./categories-section";
 import { HeroBanner } from "./hero-banner";
@@ -19,10 +20,12 @@ import { TrendingProductsSection } from "./trending-products-section";
  * Composes all homepage content sections in display order.
  * Layout chrome (announcement bar, navbar, footer) lives in StorefrontLayout.
  */
-export function HomepageSections() {
+export async function HomepageSections() {
+  const [heroContent, promoContent] = await Promise.all([getHeroContent(), getPromoContent()]);
+
   return (
     <>
-      <HeroBanner />
+      <HeroBanner content={heroContent} />
 
       <Suspense fallback={<CategoriesSectionFallback />}>
         <CategoriesSection />
@@ -40,7 +43,7 @@ export function HomepageSections() {
         <SkinConcernsSection />
       </Suspense>
 
-      <PromotionalBannerSection />
+      <PromotionalBannerSection promotion={promoContent} />
       <NewsletterSection />
     </>
   );

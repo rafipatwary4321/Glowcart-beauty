@@ -1,26 +1,33 @@
+import {
+  getPublicProductBySlug,
+  getPublicProducts,
+  getPublicRelatedProducts,
+  getPublicTrendingProducts,
+} from "@/lib/catalog/service";
 import type { Product } from "@/types/product";
 
 export async function getProducts(): Promise<Product[]> {
-  const { products } = await import("@/data/products");
-  return products;
+  return getPublicProducts();
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  const { getProductBySlug } = await import("@/data/products");
-  return getProductBySlug(slug) ?? null;
+  return getPublicProductBySlug(slug);
+}
+
+export async function getRelatedProducts(product: Product, limit = 4): Promise<Product[]> {
+  return getPublicRelatedProducts(product, limit);
 }
 
 export async function getTrendingProducts(): Promise<Product[]> {
-  const { trendingProducts } = await import("@/data/trending-products");
-  return trendingProducts;
+  return getPublicTrendingProducts();
 }
 
 export async function getBestSellers(): Promise<Product[]> {
-  const { bestSellers } = await import("@/data/dummy");
-  return bestSellers;
+  const products = await getPublicProducts();
+  return products.filter((product) => product.badge === "Bestseller").slice(0, 8);
 }
 
 export async function getNewArrivals(): Promise<Product[]> {
-  const { newArrivals } = await import("@/data/dummy");
-  return newArrivals;
+  const products = await getPublicProducts();
+  return products.filter((product) => product.badge === "New").slice(0, 8);
 }

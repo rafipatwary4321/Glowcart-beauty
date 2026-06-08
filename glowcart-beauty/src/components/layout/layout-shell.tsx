@@ -3,12 +3,14 @@
 import { usePathname } from "next/navigation";
 
 import { StorefrontLayout } from "@/components/layout/storefront-layout";
+import type { PublicSiteSettings } from "@/lib/content/settings-service";
 
 type LayoutShellProps = {
   children: React.ReactNode;
+  settings: PublicSiteSettings;
 };
 
-export function LayoutShell({ children }: LayoutShellProps) {
+export function LayoutShell({ children, settings }: LayoutShellProps) {
   const pathname = usePathname();
   const isAdminRoute = pathname.startsWith("/admin");
 
@@ -16,5 +18,5 @@ export function LayoutShell({ children }: LayoutShellProps) {
     return <>{children}</>;
   }
 
-  return <StorefrontLayout>{children}</StorefrontLayout>;
+  return <StorefrontLayout settings={settings}>{children}</StorefrontLayout>;
 }

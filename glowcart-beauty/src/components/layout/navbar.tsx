@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Menu, Search } from "lucide-react";
 import { useState } from "react";
@@ -11,9 +12,14 @@ import { Container } from "@/components/common/container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { siteConfig } from "@/constants/site-config";
+import type { PublicSiteSettings } from "@/lib/content/settings-service";
 import { cn } from "@/lib/utils";
 
-export function Navbar() {
+type NavbarProps = {
+  settings: PublicSiteSettings;
+};
+
+export function Navbar({ settings }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -30,12 +36,22 @@ export function Navbar() {
             <Menu className="size-5" />
           </Button>
 
-          <Link href="/" className="group shrink-0">
-            <span className="font-heading text-base font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary sm:text-lg lg:text-xl">
-              {siteConfig.name}
-            </span>
+          <Link href="/" className="group flex shrink-0 items-center gap-2">
+            {settings.logoUrl ? (
+              <Image
+                src={settings.logoUrl}
+                alt={settings.websiteName}
+                width={120}
+                height={36}
+                className="h-8 w-auto object-contain sm:h-9"
+              />
+            ) : (
+              <span className="font-heading text-base font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary sm:text-lg lg:text-xl">
+                {settings.websiteName}
+              </span>
+            )}
             <span className="hidden text-[10px] uppercase tracking-[0.2em] text-muted-foreground md:block">
-              {siteConfig.tagline}
+              {settings.tagline}
             </span>
           </Link>
 
