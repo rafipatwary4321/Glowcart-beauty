@@ -2,12 +2,7 @@ import Link from "next/link";
 
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { Brand } from "@/types";
-
-type BrandCardProps = {
-  brand: Brand;
-  className?: string;
-};
+import type { Brand, EntityCardProps } from "@/types";
 
 function getInitials(name: string): string {
   return name
@@ -18,25 +13,25 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-export function BrandCard({ brand, className }: BrandCardProps) {
+export function BrandCard({ data, className }: EntityCardProps<Brand>) {
   return (
-    <Link href={`/shop/brands/${brand.slug}`} className={cn("block", className)}>
+    <Link href={`/shop/brands/${data.slug}`} className={cn("block", className)}>
       <Card className="group flex h-full flex-col items-center justify-center gap-3 rounded-2xl border-border/60 bg-card py-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-lg">
         <div
           className={cn(
             "flex size-16 items-center justify-center rounded-full bg-gradient-to-br text-lg font-semibold text-foreground/80 transition-transform duration-300 group-hover:scale-105 sm:size-20 sm:text-xl",
-            brand.imageGradient
+            data.imageGradient
           )}
         >
-          {getInitials(brand.name)}
+          {getInitials(data.name)}
         </div>
         <div className="space-y-1 px-4 text-center">
           <h3 className="font-heading text-base font-medium text-foreground sm:text-lg">
-            {brand.name}
+            {data.name}
           </h3>
-          <p className="text-xs text-muted-foreground">{brand.tagline}</p>
+          <p className="text-xs text-muted-foreground">{data.tagline}</p>
           <p className="text-[11px] font-medium uppercase tracking-wider text-primary/80">
-            {brand.productCount} products
+            {data.productCount} products
           </p>
         </div>
       </Card>

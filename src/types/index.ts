@@ -1,5 +1,13 @@
 export type { Announcement } from "./announcement";
 export type { Brand } from "./brand";
+export type {
+  EntityCardProps,
+  HeroContent,
+  HomeSectionProps,
+  NewsletterContent,
+  Promotion,
+  SectionHeaderConfig,
+} from "./homepage";
 export type { Category, Product } from "./product";
 export type { Order, OrderStatus, PaymentMethod } from "./order";
 export type { SkinConcern } from "./skin-concern";

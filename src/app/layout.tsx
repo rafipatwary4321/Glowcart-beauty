@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
-import { DM_Sans, Playfair_Display, Geist } from "next/font/google";
+import { DM_Sans, Playfair_Display } from "next/font/google";
 
-import { Footer, SiteHeader } from "@/components/layout";
+import { StorefrontLayout } from "@/components/layout";
 import { AppProviders } from "@/providers";
 import { siteConfig } from "@/constants/site-config";
 
 import "./globals.css";
 import { cn } from "@/lib/utils";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -38,13 +36,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", dmSans.variable, playfair.variable, "font-sans", geist.variable)}
+      className={cn("h-full antialiased font-sans", dmSans.variable, playfair.variable)}
     >
       <body className="flex min-h-full flex-col">
         <AppProviders>
-          <SiteHeader />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <StorefrontLayout>{children}</StorefrontLayout>
         </AppProviders>
       </body>
     </html>

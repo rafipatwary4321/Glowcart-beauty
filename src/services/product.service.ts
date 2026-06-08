@@ -14,6 +14,11 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   return products.find((p) => p.slug === slug) ?? null;
 }
 
+export async function getTrendingProducts(): Promise<Product[]> {
+  const { trendingProducts } = await import("@/data/trending-products");
+  return trendingProducts;
+}
+
 export async function getBestSellers(): Promise<Product[]> {
   const { bestSellers } = await import("@/data/dummy");
   return bestSellers;
