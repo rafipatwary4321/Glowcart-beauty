@@ -22,6 +22,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
   return (
     <Card
+      data-testid="product-card"
       className={cn(
         "group overflow-hidden rounded-2xl border-border/60 bg-card py-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
         className

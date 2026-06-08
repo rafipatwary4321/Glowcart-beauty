@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { AdminEmptyState } from "@/components/admin/admin-state";
 import { cn } from "@/lib/utils";
 
 export type AdminTableColumn<T> = {
@@ -35,16 +36,20 @@ export function AdminDataTable<T extends { id: string }>({
   className,
 }: AdminDataTableProps<T>) {
   if (data.length === 0) {
-    return (
-      <div className="rounded-2xl border border-dashed border-border/60 bg-card px-6 py-12 text-center text-sm text-muted-foreground">
-        {emptyMessage}
-      </div>
-    );
+    return <AdminEmptyState title={emptyMessage} />;
   }
 
   return (
-    <div className={cn("overflow-hidden rounded-2xl border border-border/60 bg-card", className)}>
-      <Table>
+    <div
+      className={cn(
+        "overflow-x-auto rounded-2xl border border-border/60 bg-card",
+        className
+      )}
+    >
+      <p className="border-b border-border/60 px-4 py-2 text-xs text-muted-foreground md:hidden">
+        Swipe to see all columns →
+      </p>
+      <Table className="min-w-[640px]">
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             {columns.map((column) => (
@@ -78,7 +83,7 @@ export function AdminStatusBadge({
   variant?: "default" | "outline" | "destructive";
 }) {
   return (
-    <Badge variant={variant} className="capitalize">
+    <Badge variant={variant} className="normal-case">
       {label}
     </Badge>
   );
@@ -88,10 +93,12 @@ export function AdminTableActions({
   onEdit,
   onDelete,
   editHref,
+  deleteLabel = "Delete",
 }: {
   onEdit?: () => void;
   onDelete?: () => void;
   editHref?: string;
+  deleteLabel?: string;
 }) {
   return (
     <div className="flex items-center gap-1">
@@ -110,8 +117,9 @@ export function AdminTableActions({
           size="sm"
           className="h-8 rounded-full px-3 text-destructive hover:text-destructive"
           onClick={onDelete}
+          aria-label={deleteLabel}
         >
-          Delete
+          {deleteLabel}
         </Button>
       ) : null}
     </div>

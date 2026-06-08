@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
+
 import { AdminPageHeader, AdminReviewsTable } from "@/components/admin";
+
+export const metadata: Metadata = {
+  title: "Reviews",
+};
 
 export default function AdminReviewsPage() {
   return (

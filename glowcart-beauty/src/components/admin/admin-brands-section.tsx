@@ -12,11 +12,12 @@ import {
   type AdminTableColumn,
 } from "@/components/admin/admin-data-table";
 import { AdminTableSkeleton } from "@/components/admin/admin-table-skeleton";
+import { AdminErrorState } from "@/components/admin/admin-state";
 import { AdminImagePreview } from "@/components/admin/admin-image-preview";
 import { FormField } from "@/components/admin/form-field";
 import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,6 +43,7 @@ const defaultValues: BrandFormValues = {
 export function AdminBrandsSection() {
   const [items, setItems] = useState<AdminBrandRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -54,10 +56,17 @@ export function AdminBrandsSection() {
 
   const loadItems = useCallback(async () => {
     setLoading(true);
-    const result = await fetchAdminBrands();
-    setItems(result.data);
-    notifyFallbackRead(result.source);
-    setLoading(false);
+    setError(null);
+
+    try {
+      const result = await fetchAdminBrands();
+      setItems(result.data);
+      notifyFallbackRead(result.source);
+    } catch {
+      setError("Unable to load brands.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -148,7 +157,7 @@ export function AdminBrandsSection() {
       cell: (row) => (
         <div className="flex items-center justify-end gap-1">
           <AdminTableActions onEdit={() => startEdit(row)} />
-          <Button variant="ghost" size="sm" className="h-8 text-destructive" disabled={deletingId === row.id} onClick={() => void handleDelete(row.id)}>
+          <Button variant="ghost" size="sm" className="h-8 text-destructive" disabled={deletingId === row.id} onClick={() => void handleDelete(row.id)} aria-label={`Archive ${row.name}`}>
             {deletingId === row.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
           </Button>
         </div>
@@ -162,10 +171,19 @@ export function AdminBrandsSection() {
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-      {loading ? <AdminTableSkeleton /> : <AdminDataTable columns={columns} data={items} />}
-      <Card className="border-border/60">
+      {loading ? (
+        <AdminTableSkeleton />
+      ) : error ? (
+        <AdminErrorState message={error} onRetry={() => void loadItems()} />
+      ) : (
+        <div className="order-2 min-w-0 xl:order-1">
+          <AdminDataTable columns={columns} data={items} emptyMessage="No brands yet. Create one using the form." />
+        </div>
+      )}
+      <Card className="order-1 h-fit border-border/60 xl:order-2 xl:sticky xl:top-24">
         <CardHeader>
           <CardTitle>{editingId ? "Edit Brand" : "Add Brand"}</CardTitle>
+          <CardDescription>Manage the beauty brands featured in your catalog.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">

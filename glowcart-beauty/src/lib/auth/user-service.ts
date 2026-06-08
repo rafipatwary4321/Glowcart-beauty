@@ -119,10 +119,18 @@ export async function findOrCreateOAuthUser(
 export async function ensureAdminSeedUser(): Promise<void> {
   await connectDB();
 
-  const adminEmail = env.adminEmail;
-  const adminPassword = env.adminPassword;
+  const adminEmail = (
+    process.env.ADMIN_EMAIL ??
+    process.env.ADMIN_SEED_EMAIL ??
+    "admin@glowcart.com"
+  ).toLowerCase();
+  const adminPassword =
+    process.env.ADMIN_PASSWORD ??
+    process.env.ADMIN_SEED_PASSWORD ??
+    "admin1234";
+  const adminName = process.env.ADMIN_SEED_NAME ?? "GlowCart Admin";
 
-  const existing = await User.findOne({ email: adminEmail.toLowerCase() });
+  const existing = await User.findOne({ email: adminEmail });
 
   if (existing) {
     if (existing.role !== "admin") {
@@ -133,8 +141,8 @@ export async function ensureAdminSeedUser(): Promise<void> {
   }
 
   await User.create({
-    name: env.adminName,
-    email: adminEmail.toLowerCase(),
+    name: adminName,
+    email: adminEmail,
     password: adminPassword,
     role: "admin",
   });

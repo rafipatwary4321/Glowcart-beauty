@@ -36,6 +36,7 @@ export function WishlistButton({
       aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
       aria-pressed={isInWishlist}
       onClick={() => toggleWishlist(product)}
+      data-testid="wishlist-button"
     >
       <Heart className={cn("size-4", isInWishlist && "fill-primary")} />
       {size === "default" && (isInWishlist ? "Saved" : "Wishlist")}

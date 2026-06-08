@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { Loader2 } from "lucide-react";
 
+import { AdminErrorState, AdminLoadingState } from "@/components/admin/admin-state";
 import { AnalyticsDateFilter } from "@/components/admin/analytics/analytics-date-filter";
 import { AnalyticsExportButtons } from "@/components/admin/analytics/analytics-export-buttons";
 import { Badge } from "@/components/ui/badge";
@@ -26,13 +26,22 @@ export function AdminReportShell({
   const [range, setRange] = useState<AnalyticsRange>("30d");
   const [data, setData] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadData = useCallback(async (selectedRange: AnalyticsRange) => {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch(`${endpoint}?range=${selectedRange}`, { cache: "no-store" });
       const json = await response.json();
-      if (json.success) setData(json.data);
+      if (json.success) {
+        setData(json.data);
+      } else {
+        throw new Error("Report request failed.");
+      }
+    } catch {
+      setError("Unable to load this report. Please try again.");
+      setData(null);
     } finally {
       setLoading(false);
     }
@@ -67,13 +76,14 @@ export function AdminReportShell({
       ) : null}
 
       {loading ? (
-        <div className="flex items-center gap-2 py-16 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" />
-          Loading report...
-        </div>
+        <AdminLoadingState message="Loading report..." />
+      ) : error ? (
+        <AdminErrorState message={error} onRetry={() => void loadData(range)} />
       ) : data ? (
         children(data)
-      ) : null}
+      ) : (
+        <AdminErrorState message="No report data available." onRetry={() => void loadData(range)} />
+      )}
     </div>
   );
 }

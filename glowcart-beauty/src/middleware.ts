@@ -16,7 +16,7 @@ function isAuthRedirectPath(pathname: string): boolean {
 
 export default auth((request) => {
   const { pathname } = request.nextUrl;
-  const isAuthenticated = Boolean(request.auth);
+  const isAuthenticated = Boolean(request.auth?.user);
   const userRole = request.auth?.user?.role;
 
   const isOrderSuccessPath = pathname.startsWith("/order-success/");
@@ -54,8 +54,6 @@ export const config = {
   matcher: [
     "/admin/:path*",
     "/profile/:path*",
-    "/cart",
-    "/wishlist",
     "/checkout",
     "/order-success/:path*",
     "/login",

@@ -123,13 +123,20 @@ export function AdminMobileNav() {
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="left" className="w-full max-w-xs p-0">
+        <SheetContent side="left" className="flex w-full max-w-xs flex-col p-0">
           <SheetHeader className="border-b border-border/60 px-5 py-5 text-left">
             <SheetTitle className="font-heading text-lg">{siteConfig.name}</SheetTitle>
             <p className="text-sm text-muted-foreground">Admin Dashboard</p>
           </SheetHeader>
-          <div className="p-4">
+          <div className="flex-1 overflow-y-auto p-4">
             <NavLinks onNavigate={() => setOpen(false)} />
+          </div>
+          <div className="border-t border-border/60 p-4">
+            <Button asChild variant="outline" className="w-full rounded-full" size="sm">
+              <Link href={routes.home} onClick={() => setOpen(false)}>
+                View Storefront
+              </Link>
+            </Button>
           </div>
         </SheetContent>
       </Sheet>

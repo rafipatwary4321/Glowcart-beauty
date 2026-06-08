@@ -29,6 +29,7 @@ import {
   initNagadPayment,
   initSSLCommerzPayment,
 } from "@/lib/payment/client";
+import { useHydrated } from "@/hooks/use-hydrated";
 import { useCartStore } from "@/store/cart-store";
 
 const defaultValues: CheckoutFormValues = {
@@ -57,6 +58,7 @@ export function CheckoutPageContent() {
   const items = useCartStore((state) => state.items);
   const clearCart = useCartStore((state) => state.clearCart);
   const subtotal = useCartStore((state) => state.calculateSubtotal());
+  const hydrated = useHydrated();
 
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
@@ -193,9 +195,18 @@ export function CheckoutPageContent() {
     }
   }
 
+  if (!hydrated) {
+    return (
+      <div
+        className="h-96 animate-pulse rounded-2xl bg-beige-100"
+        data-testid="checkout-page-loading"
+      />
+    );
+  }
+
   if (items.length === 0) {
     return (
-      <Card className="max-w-xl border-border/60">
+      <Card className="max-w-xl border-border/60" data-testid="checkout-page">
         <CardHeader>
           <CardTitle>Your cart is empty</CardTitle>
           <CardDescription>Add products before checking out.</CardDescription>
@@ -210,7 +221,11 @@ export function CheckoutPageContent() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_360px]">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_360px]"
+      data-testid="checkout-page"
+    >
       <div className="space-y-6">
         <Card className="border-border/60">
           <CardHeader>

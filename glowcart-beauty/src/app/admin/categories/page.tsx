@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
+
 import { AdminCategoriesSection, AdminPageHeader } from "@/components/admin";
+
+export const metadata: Metadata = {
+  title: "Categories",
+};
 
 export default function AdminCategoriesPage() {
   return (

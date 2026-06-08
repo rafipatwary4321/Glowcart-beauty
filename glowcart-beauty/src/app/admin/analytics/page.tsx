@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
+
 import { AdminAnalyticsContent, AdminPageHeader } from "@/components/admin";
+
+export const metadata: Metadata = {
+  title: "Analytics",
+};
 
 export default function AdminAnalyticsPage() {
   return (

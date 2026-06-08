@@ -3,12 +3,19 @@
 import {
   AdminDataTable,
   AdminStatusBadge,
-  AdminTableActions,
   type AdminTableColumn,
 } from "@/components/admin/admin-data-table";
 import { Badge } from "@/components/ui/badge";
 import { adminUsers } from "@/data/admin";
 import type { AdminUserRow } from "@/types/admin";
+
+function formatRole(role: AdminUserRow["role"]) {
+  return role.charAt(0).toUpperCase() + role.slice(1);
+}
+
+function formatStatus(status: AdminUserRow["status"]) {
+  return status === "active" ? "Active" : "Inactive";
+}
 
 const columns: AdminTableColumn<AdminUserRow>[] = [
   {
@@ -24,7 +31,8 @@ const columns: AdminTableColumn<AdminUserRow>[] = [
   {
     key: "role",
     header: "Role",
-    cell: (row) => <Badge variant="outline" className="capitalize">{row.role}</Badge>,
+    className: "hidden sm:table-cell",
+    cell: (row) => <Badge variant="outline">{formatRole(row.role)}</Badge>,
   },
   {
     key: "orders",
@@ -34,6 +42,7 @@ const columns: AdminTableColumn<AdminUserRow>[] = [
   {
     key: "joined",
     header: "Joined",
+    className: "hidden md:table-cell",
     cell: (row) => new Date(row.joinedAt).toLocaleDateString("en-BD"),
   },
   {
@@ -41,19 +50,19 @@ const columns: AdminTableColumn<AdminUserRow>[] = [
     header: "Status",
     cell: (row) => (
       <AdminStatusBadge
-        label={row.status}
+        label={formatStatus(row.status)}
         variant={row.status === "active" ? "default" : "destructive"}
       />
     ),
   },
-  {
-    key: "actions",
-    header: "",
-    className: "text-right",
-    cell: () => <AdminTableActions onEdit={() => undefined} />,
-  },
 ];
 
 export function AdminUsersTable() {
-  return <AdminDataTable columns={columns} data={adminUsers} />;
+  return (
+    <AdminDataTable
+      columns={columns}
+      data={adminUsers}
+      emptyMessage="No users found."
+    />
+  );
 }

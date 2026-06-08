@@ -11,7 +11,7 @@ export function CartPageContent() {
 
   if (!hydrated) {
     return (
-      <div className="animate-pulse space-y-4">
+      <div className="animate-pulse space-y-4" data-testid="cart-page-loading">
         {[1, 2].map((i) => (
           <div key={i} className="h-32 rounded-2xl bg-beige-100" />
         ))}
@@ -20,11 +20,18 @@ export function CartPageContent() {
   }
 
   if (items.length === 0) {
-    return <CartEmptyState />;
+    return (
+      <div data-testid="cart-page">
+        <CartEmptyState />
+      </div>
+    );
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:gap-10">
+    <div
+      className="grid gap-8 lg:grid-cols-[1fr_360px] lg:gap-10"
+      data-testid="cart-page"
+    >
       <div className="space-y-4">
         <p className="text-sm text-muted-foreground">
           {items.length} {items.length === 1 ? "item" : "items"} in your cart

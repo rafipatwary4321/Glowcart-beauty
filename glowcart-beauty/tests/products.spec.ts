@@ -1,34 +1,60 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./helpers/fixtures";
 
-import { loginAsCustomer } from "./helpers/auth";
+import {
+  AUTH_E2E_SKIP_REASON,
+  addProductToWishlistFromDetail,
+  expectPublicWishlistPage,
+  isAuthenticatedE2eEnabled,
+  loginAsCustomer,
+  waitForPersistedWishlistItem,
+} from "./helpers/auth";
 
-const hasDatabase = Boolean(process.env.MONGODB_URI);
-
-test.describe("Products", () => {
+test.describe("Products public pages", () => {
   test("products page loads", async ({ page }) => {
     await page.goto("/products");
     await expect(page.getByRole("heading", { name: /our collection/i })).toBeVisible();
+    await expect(page.getByTestId("product-card").first()).toBeVisible();
   });
 
   test("product details page loads", async ({ page }) => {
     await page.goto("/products/velvet-rose-hydrating-serum");
     await expect(page.getByRole("heading", { level: 1 })).toContainText(/velvet rose/i);
-    await expect(page.getByRole("button", { name: /add to cart/i }).first()).toBeVisible();
+    await expect(page.getByTestId("product-info").getByTestId("add-to-cart")).toBeVisible();
+    await expect(page.getByTestId("product-info").getByTestId("wishlist-button")).toBeVisible();
+  });
+});
+
+test.describe("Wishlist public routes", () => {
+  test("wishlist page loads without authentication", async ({ page }) => {
+    await expectPublicWishlistPage(page);
+  });
+});
+
+test.describe("Wishlist store UI (public product page)", () => {
+  test("wishlist toggle persists in local storage from product page", async ({ page }) => {
+    await page.goto("/products/velvet-rose-hydrating-serum");
+    await page.getByTestId("product-info").getByTestId("wishlist-button").click();
+    await waitForPersistedWishlistItem(page);
   });
 
-  test.describe("Wishlist", () => {
-    test.beforeEach(async ({ page }) => {
-      test.skip(!hasDatabase, "Requires MongoDB with seeded customer user");
-      await loginAsCustomer(page);
-    });
+  test("wishlist button shows saved item on wishlist page", async ({ page }) => {
+    await page.goto("/products/velvet-rose-hydrating-serum");
+    await page.getByTestId("product-info").getByTestId("wishlist-button").click();
+    await waitForPersistedWishlistItem(page);
+    await expectPublicWishlistPage(page);
+    await expect(page.getByText(/velvet rose/i)).toBeVisible();
+  });
+});
 
-    test("wishlist works", async ({ page }) => {
-      await page.goto("/products/velvet-rose-hydrating-serum");
-      await page.getByRole("button", { name: /add to wishlist/i }).first().click();
+test.describe("Wishlist authenticated flows", () => {
+  test.beforeEach(() => {
+    test.skip(!isAuthenticatedE2eEnabled(), AUTH_E2E_SKIP_REASON);
+  });
 
-      await page.goto("/wishlist");
-      await expect(page.getByRole("heading", { name: /my wishlist/i })).toBeVisible();
-      await expect(page.getByText(/velvet rose/i)).toBeVisible();
-    });
+  test("wishlist page shows saved product when logged in", async ({ page }) => {
+    await loginAsCustomer(page);
+    await addProductToWishlistFromDetail(page, "velvet-rose-hydrating-serum");
+    await expectPublicWishlistPage(page);
+    await expect(page.getByText(/velvet rose/i)).toBeVisible();
   });
 });

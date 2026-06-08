@@ -12,6 +12,7 @@ import {
   type AdminTableColumn,
 } from "@/components/admin/admin-data-table";
 import { AdminTableSkeleton } from "@/components/admin/admin-table-skeleton";
+import { AdminErrorState } from "@/components/admin/admin-state";
 import { FormField } from "@/components/admin/form-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,6 +45,7 @@ const defaultValues: CouponFormValues = {
 export function AdminCouponsSection() {
   const [items, setItems] = useState<AdminCouponRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -56,10 +58,17 @@ export function AdminCouponsSection() {
 
   const loadItems = useCallback(async () => {
     setLoading(true);
-    const result = await fetchAdminCoupons();
-    setItems(result.data);
-    notifyFallbackRead(result.source);
-    setLoading(false);
+    setError(null);
+
+    try {
+      const result = await fetchAdminCoupons();
+      setItems(result.data);
+      notifyFallbackRead(result.source);
+    } catch {
+      setError("Unable to load coupons.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -74,6 +83,7 @@ export function AdminCouponsSection() {
       discountType: row.discountType,
       discountValue: row.discountValue,
       minOrderAmount: row.minOrderAmount,
+      maxDiscountAmount: row.maxDiscountAmount,
       usageLimit: row.usageLimit,
       expiresAt: row.expiresAt ?? "",
       isActive: row.isActive,
@@ -160,7 +170,7 @@ export function AdminCouponsSection() {
       cell: (row) => (
         <div className="flex items-center justify-end gap-1">
           <AdminTableActions onEdit={() => startEdit(row)} />
-          <Button variant="ghost" size="sm" className="h-8 text-destructive" disabled={deletingId === row.id} onClick={() => void handleDelete(row.id)}>
+          <Button variant="ghost" size="sm" className="h-8 text-destructive" disabled={deletingId === row.id} onClick={() => void handleDelete(row.id)} aria-label={`Archive ${row.code}`}>
             {deletingId === row.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
           </Button>
         </div>
@@ -172,11 +182,19 @@ export function AdminCouponsSection() {
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-      {loading ? <AdminTableSkeleton /> : <AdminDataTable columns={columns} data={items} />}
-      <Card className="border-border/60">
+      {loading ? (
+        <AdminTableSkeleton />
+      ) : error ? (
+        <AdminErrorState message={error} onRetry={() => void loadItems()} />
+      ) : (
+        <div className="order-2 min-w-0 xl:order-1">
+          <AdminDataTable columns={columns} data={items} emptyMessage="No coupons yet. Create one using the form." />
+        </div>
+      )}
+      <Card className="order-1 h-fit border-border/60 xl:order-2 xl:sticky xl:top-24">
         <CardHeader>
           <CardTitle>{editingId ? "Edit Coupon" : "Create Coupon"}</CardTitle>
-          <CardDescription>Connected to POST/PUT /api/coupons with fallback support.</CardDescription>
+          <CardDescription>Manage discount codes and promotional offers.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
@@ -194,6 +212,12 @@ export function AdminCouponsSection() {
             </FormField>
             <FormField label="Minimum order (৳)" htmlFor="minOrderAmount" error={errors.minOrderAmount?.message}>
               <Input id="minOrderAmount" type="number" className="h-10 rounded-lg" {...register("minOrderAmount", { valueAsNumber: true })} />
+            </FormField>
+            <FormField label="Max discount (৳)" htmlFor="maxDiscountAmount" error={errors.maxDiscountAmount?.message}>
+              <Input id="maxDiscountAmount" type="number" className="h-10 rounded-lg" {...register("maxDiscountAmount", { valueAsNumber: true })} />
+            </FormField>
+            <FormField label="Usage limit" htmlFor="usageLimit" error={errors.usageLimit?.message}>
+              <Input id="usageLimit" type="number" min={0} className="h-10 rounded-lg" {...register("usageLimit", { valueAsNumber: true })} />
             </FormField>
             <FormField label="Expires at" htmlFor="expiresAt" error={errors.expiresAt?.message}>
               <Input id="expiresAt" type="date" className="h-10 rounded-lg" {...register("expiresAt")} />

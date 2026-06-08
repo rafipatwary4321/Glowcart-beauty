@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -15,6 +14,7 @@ import { AnalyticsDateFilter } from "@/components/admin/analytics/analytics-date
 import { AnalyticsExportButtons } from "@/components/admin/analytics/analytics-export-buttons";
 import { AnalyticsInsightsGrid } from "@/components/admin/analytics/analytics-insights-grid";
 import { AnalyticsMetricsGrid } from "@/components/admin/analytics/analytics-metrics-grid";
+import { AdminErrorState, AdminLoadingState } from "@/components/admin/admin-state";
 import { Badge } from "@/components/ui/badge";
 import type { AnalyticsOverview, AnalyticsRange } from "@/types/analytics";
 
@@ -22,9 +22,11 @@ export function AdminAnalyticsContent() {
   const [range, setRange] = useState<AnalyticsRange>("30d");
   const [data, setData] = useState<AnalyticsOverview | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadData = useCallback(async (selectedRange: AnalyticsRange) => {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch(`/api/analytics/overview?range=${selectedRange}`, { cache: "no-store" });
       const json = await response.json();
@@ -33,7 +35,12 @@ export function AdminAnalyticsContent() {
         if (json.data.source === "mock") {
           toast.message("Showing sample analytics — connect MongoDB for live data.");
         }
+      } else {
+        throw new Error("Analytics request failed.");
       }
+    } catch {
+      setError("Unable to load analytics. Please try again.");
+      setData(null);
     } finally {
       setLoading(false);
     }
@@ -58,10 +65,9 @@ export function AdminAnalyticsContent() {
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 py-16 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" />
-          Loading analytics...
-        </div>
+        <AdminLoadingState message="Loading analytics..." />
+      ) : error ? (
+        <AdminErrorState message={error} onRetry={() => void loadData(range)} />
       ) : data ? (
         <>
           <div className="flex items-center gap-2">
@@ -93,7 +99,9 @@ export function AdminAnalyticsContent() {
             <AnalyticsInsightsGrid insights={data.insights} />
           </div>
         </>
-      ) : null}
+      ) : (
+        <AdminErrorState message="No analytics data available." onRetry={() => void loadData(range)} />
+      )}
     </div>
   );
 }

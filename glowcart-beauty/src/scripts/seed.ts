@@ -267,7 +267,7 @@ async function main() {
   console.log("[seed] GlowCart Beauty — database seed");
   console.log("[seed] --------------------------------");
 
-  if (!env.mongodbUri) {
+  if (!process.env.MONGODB_URI?.trim()) {
     throw new DbConnectionError(
       "MONGODB_URI is not set. Add it to .env.local before seeding."
     );

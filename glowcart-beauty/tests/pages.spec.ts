@@ -1,4 +1,10 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./helpers/fixtures";
+import {
+  expectLoginPageVisible,
+  expectProtectedRouteRedirectsToLogin,
+  expectPublicCartPage,
+  expectPublicWishlistPage,
+} from "./helpers/auth";
 
 test.describe("Public pages", () => {
   test("homepage loads", async ({ page }) => {
@@ -17,15 +23,27 @@ test.describe("Public pages", () => {
   });
 
   test("login page loads", async ({ page }) => {
-    await page.goto("/login");
+    await expectLoginPageVisible(page);
     await expect(page.getByRole("heading", { name: /welcome back/i })).toBeVisible();
+  });
+
+  test("products page loads", async ({ page }) => {
+    await page.goto("/products");
+    await expect(page.getByRole("heading", { name: /our collection/i })).toBeVisible();
+  });
+
+  test("cart page loads publicly", async ({ page }) => {
+    await expectPublicCartPage(page);
+  });
+
+  test("wishlist page loads publicly", async ({ page }) => {
+    await expectPublicWishlistPage(page);
   });
 });
 
 test.describe("Protected routes redirect unauthenticated users", () => {
   const protectedRoutes = [
-    { path: "/cart", name: "cart" },
-    { path: "/wishlist", name: "wishlist" },
+    { path: "/profile", name: "profile" },
     { path: "/checkout", name: "checkout" },
     { path: "/admin", name: "admin dashboard" },
     { path: "/admin/products", name: "admin products" },
@@ -34,8 +52,7 @@ test.describe("Protected routes redirect unauthenticated users", () => {
 
   for (const route of protectedRoutes) {
     test(`${route.name} redirects to login`, async ({ page }) => {
-      await page.goto(route.path);
-      await expect(page).toHaveURL(/\/login/);
+      await expectProtectedRouteRedirectsToLogin(page, route.path);
     });
   }
 });

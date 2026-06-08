@@ -40,7 +40,7 @@ export function AdminPageHeader({
       </div>
 
       {actionLabel && actionHref ? (
-        <Button asChild className="rounded-full">
+        <Button asChild className="w-full shrink-0 rounded-full sm:w-auto">
           <Link href={actionHref}>
             <Plus className="size-4" />
             {actionLabel}

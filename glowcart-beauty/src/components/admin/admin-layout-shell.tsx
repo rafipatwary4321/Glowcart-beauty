@@ -9,9 +9,9 @@ export function AdminLayoutShell({ children }: AdminLayoutShellProps) {
   return (
     <div className="flex min-h-screen bg-beige-50/40">
       <AdminSidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
         <AdminTopbar />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );

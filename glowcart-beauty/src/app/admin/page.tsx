@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
+
 import { AdminDashboardContent } from "@/components/admin/admin-dashboard-content";
 import { AdminPageHeader } from "@/components/admin";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+};
 
 export default function AdminDashboardPage() {
   return (

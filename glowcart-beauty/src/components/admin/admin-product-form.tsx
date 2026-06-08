@@ -2,11 +2,13 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { FormField } from "@/components/admin/form-field";
+import { AdminErrorState } from "@/components/admin/admin-state";
 import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +55,7 @@ const defaultValues: ProductFormValues = {
 export function AdminProductForm({ mode, productId }: AdminProductFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(mode === "edit");
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [optionsLoading, setOptionsLoading] = useState(true);
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
   const [brands, setBrands] = useState<Array<{ id: string; name: string }>>([]);
@@ -115,15 +118,16 @@ export function AdminProductForm({ mode, productId }: AdminProductFormProps) {
           stockCount: result.data.stockCount,
           skinConcerns: result.data.skinConcerns.join(", "),
           badge: (result.data.badge as ProductFormValues["badge"]) ?? "",
-          description: "",
-          ingredients: "",
-          howToUse: "",
+          description: result.data.description ?? "",
+          ingredients: result.data.ingredients ?? "",
+          howToUse: result.data.howToUse ?? "",
           imageGradient: result.data.imageGradient,
           images: result.data.images ?? [],
           inStock: result.data.inStock,
           isActive: result.data.isActive,
         });
       } catch {
+        setLoadError("Product not found or could not be loaded.");
         notifyMutationResult({
           ok: false,
           source: "fallback",
@@ -159,6 +163,15 @@ export function AdminProductForm({ mode, productId }: AdminProductFormProps) {
     }
   }
 
+  if (loadError) {
+    return (
+      <AdminErrorState
+        message={loadError}
+        onRetry={() => router.push(routes.admin.products)}
+      />
+    );
+  }
+
   if (loading || optionsLoading) {
     return (
       <div className="space-y-4">
@@ -171,6 +184,15 @@ export function AdminProductForm({ mode, productId }: AdminProductFormProps) {
   const inStock = watch("inStock");
   const isActive = watch("isActive");
   const images = watch("images") ?? [];
+
+  if (mode === "create" && categories.length === 0) {
+    return (
+      <AdminErrorState
+        message="Add at least one category before creating a product."
+        onRetry={() => router.push(routes.admin.categories)}
+      />
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -292,18 +314,23 @@ export function AdminProductForm({ mode, productId }: AdminProductFormProps) {
             </CardContent>
           </Card>
 
-          <Button type="submit" className="w-full rounded-full" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                Saving...
-              </>
-            ) : mode === "create" ? (
-              "Create Product"
-            ) : (
-              "Save Changes"
-            )}
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button type="submit" className="w-full rounded-full" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Saving...
+                </>
+              ) : mode === "create" ? (
+                "Create Product"
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
+            <Button type="button" variant="outline" className="w-full rounded-full" asChild>
+              <Link href={routes.admin.products}>Cancel</Link>
+            </Button>
+          </div>
         </div>
       </div>
     </form>

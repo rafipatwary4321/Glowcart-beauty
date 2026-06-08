@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarRange } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { ANALYTICS_RANGE_OPTIONS } from "@/lib/analytics/date-range";
@@ -26,7 +27,7 @@ export function AnalyticsDateFilter({ value, onChange, className }: AnalyticsDat
             className="rounded-full"
             onClick={() => {
               if (option.key === "custom") {
-                window.alert("Custom date range picker is coming soon. Using last 30 days for now.");
+                toast.message("Custom date range picker is coming soon. Using last 30 days for now.");
                 onChange("30d");
                 return;
               }

@@ -2,8 +2,6 @@ import { routes } from "@/constants/routes";
 
 export const protectedRoutes = [
   routes.profile,
-  routes.cart,
-  routes.wishlist,
   routes.checkout,
 ] as const;
 

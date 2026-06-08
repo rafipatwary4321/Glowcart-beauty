@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
+
 import { AdminPageHeader, AdminSettingsForm } from "@/components/admin";
+
+export const metadata: Metadata = {
+  title: "Settings",
+};
 
 export default function AdminSettingsPage() {
   return (

@@ -1,12 +1,16 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
+
 import {
   AdminDataTable,
   AdminStatusBadge,
-  AdminTableActions,
+  AdminTableSkeleton,
   type AdminTableColumn,
-} from "@/components/admin/admin-data-table";
+} from "@/components/admin";
+import { AdminErrorState } from "@/components/admin/admin-state";
 import { adminReviews } from "@/data/admin";
+import { isDevFallbackEnabled } from "@/lib/admin/api-client";
 import type { AdminReviewRow } from "@/types/admin";
 
 const columns: AdminTableColumn<AdminReviewRow>[] = [
@@ -49,14 +53,63 @@ const columns: AdminTableColumn<AdminReviewRow>[] = [
       />
     ),
   },
-  {
-    key: "actions",
-    header: "",
-    className: "text-right",
-    cell: () => <AdminTableActions onEdit={() => undefined} />,
-  },
 ];
 
 export function AdminReviewsTable() {
-  return <AdminDataTable columns={columns} data={adminReviews} />;
+  const [reviews, setReviews] = useState<AdminReviewRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadReviews = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/reviews", { cache: "no-store" });
+      const json = await response.json();
+
+      if (response.ok && json.success) {
+        setReviews(
+          (json.data.items as AdminReviewRow[]).map((item) => ({
+            ...item,
+            createdAt: String(item.createdAt ?? new Date().toISOString()),
+          }))
+        );
+        return;
+      }
+
+      if (isDevFallbackEnabled()) {
+        setReviews(adminReviews);
+        return;
+      }
+
+      throw new Error("Reviews request failed.");
+    } catch {
+      if (isDevFallbackEnabled()) {
+        setReviews(adminReviews);
+      } else {
+        setError("Unable to load reviews.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadReviews();
+  }, [loadReviews]);
+
+  if (loading) return <AdminTableSkeleton rows={6} />;
+
+  if (error) {
+    return <AdminErrorState message={error} onRetry={() => void loadReviews()} />;
+  }
+
+  return (
+    <AdminDataTable
+      columns={columns}
+      data={reviews}
+      emptyMessage="No customer reviews yet."
+    />
+  );
 }

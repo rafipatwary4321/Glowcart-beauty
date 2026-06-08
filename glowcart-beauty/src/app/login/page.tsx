@@ -19,9 +19,11 @@ export default function LoginPage() {
       title="Welcome back"
       description="Sign in to access your profile, orders, and saved addresses."
     >
-      <Suspense fallback={<p className="text-sm text-muted-foreground">Loading...</p>}>
-        <LoginForm googleEnabled={googleEnabled} />
-      </Suspense>
+      <div data-testid="login-page">
+        <Suspense fallback={<p className="text-sm text-muted-foreground">Loading...</p>}>
+          <LoginForm googleEnabled={googleEnabled} />
+        </Suspense>
+      </div>
     </AuthLayout>
   );
 }

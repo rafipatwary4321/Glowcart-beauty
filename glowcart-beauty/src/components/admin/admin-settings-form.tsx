@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { FormField } from "@/components/admin/form-field";
 import { ImageUploadField } from "@/components/admin/image-upload-field";
+import { AdminLoadingState } from "@/components/admin/admin-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,6 +30,7 @@ export function AdminSettingsForm() {
   const [values, setValues] = useState<AdminWebsiteSettings>(defaultValues);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     async function loadSettings() {
@@ -69,8 +72,35 @@ export function AdminSettingsForm() {
     setValues((current) => ({ ...current, [key]: value }));
   }
 
+  function validateSettings(input: AdminWebsiteSettings) {
+    const errors: Record<string, string> = {};
+
+    if (!input.websiteName.trim()) {
+      errors.websiteName = "Website name is required.";
+    }
+
+    if (!input.contactEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.contactEmail)) {
+      errors.contactEmail = "Enter a valid contact email.";
+    }
+
+    if (input.deliveryCharge < 0) {
+      errors.deliveryCharge = "Delivery charge cannot be negative.";
+    }
+
+    if (input.freeDeliveryThreshold < 0) {
+      errors.freeDeliveryThreshold = "Free delivery threshold cannot be negative.";
+    }
+
+    return errors;
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const errors = validateSettings(values);
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     setSaving(true);
 
     const result = await updateAdminSettings({
@@ -107,12 +137,7 @@ export function AdminSettingsForm() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" />
-        Loading settings...
-      </div>
-    );
+    return <AdminLoadingState message="Loading settings..." />;
   }
 
   return (
@@ -123,15 +148,14 @@ export function AdminSettingsForm() {
           <CardDescription>Website identity and branding.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="websiteName">Website name</Label>
+          <FormField label="Website name" htmlFor="websiteName" error={fieldErrors.websiteName} className="sm:col-span-2">
             <Input
               id="websiteName"
               value={values.websiteName}
               onChange={(e) => updateField("websiteName", e.target.value)}
               className="h-10 rounded-lg"
             />
-          </div>
+          </FormField>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="tagline">Tagline</Label>
             <Input
@@ -196,8 +220,7 @@ export function AdminSettingsForm() {
               className="h-10 rounded-lg"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="contactEmail">Contact email</Label>
+          <FormField label="Contact email" htmlFor="contactEmail" error={fieldErrors.contactEmail}>
             <Input
               id="contactEmail"
               type="email"
@@ -205,7 +228,7 @@ export function AdminSettingsForm() {
               onChange={(e) => updateField("contactEmail", e.target.value)}
               className="h-10 rounded-lg"
             />
-          </div>
+          </FormField>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="contactAddress">Contact address</Label>
             <Input
@@ -277,26 +300,26 @@ export function AdminSettingsForm() {
           <CardTitle>Delivery & Policies</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="deliveryCharge">Delivery charge (৳)</Label>
+          <FormField label="Delivery charge (৳)" htmlFor="deliveryCharge" error={fieldErrors.deliveryCharge}>
             <Input
               id="deliveryCharge"
               type="number"
+              min={0}
               value={values.deliveryCharge}
               onChange={(e) => updateField("deliveryCharge", Number(e.target.value))}
               className="h-10 rounded-lg"
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="freeDeliveryThreshold">Free delivery threshold (৳)</Label>
+          </FormField>
+          <FormField label="Free delivery threshold (৳)" htmlFor="freeDeliveryThreshold" error={fieldErrors.freeDeliveryThreshold}>
             <Input
               id="freeDeliveryThreshold"
               type="number"
+              min={0}
               value={values.freeDeliveryThreshold}
               onChange={(e) => updateField("freeDeliveryThreshold", Number(e.target.value))}
               className="h-10 rounded-lg"
             />
-          </div>
+          </FormField>
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="privacyPolicy">Privacy policy</Label>
             <Textarea

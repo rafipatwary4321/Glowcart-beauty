@@ -59,8 +59,8 @@ const lowStockColumns: AdminTableColumn<AdminProductRow & { threshold?: number }
     header: "Status",
     cell: (row) => (
       <AdminStatusBadge
-        label={row.inStock ? "Low stock" : "Out of stock"}
-        variant={row.inStock ? "outline" : "destructive"}
+        label={row.stockCount === 0 ? "Out of stock" : "Low stock"}
+        variant={row.stockCount === 0 ? "destructive" : "outline"}
       />
     ),
   },

@@ -11,6 +11,7 @@ import {
   type AdminTableColumn,
 } from "@/components/admin/admin-data-table";
 import { AdminTableSkeleton } from "@/components/admin/admin-table-skeleton";
+import { AdminErrorState } from "@/components/admin/admin-state";
 import { Select } from "@/components/ui/select";
 import { routes } from "@/constants/routes";
 import { getPaymentMethodLabel } from "@/lib/orders/constants";
@@ -113,14 +114,16 @@ function PaymentStatusSelect({
 export function AdminOrdersTable() {
   const [items, setItems] = useState<AdminOrderRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadItems = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const orders = await fetchAdminOrders();
       setItems(orders.map(mapOrderSummaryToAdminRow));
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unable to load orders.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to load orders.");
     } finally {
       setLoading(false);
     }
@@ -148,6 +151,7 @@ export function AdminOrdersTable() {
     {
       key: "customer",
       header: "Customer",
+      className: "hidden sm:table-cell",
       cell: (row) => (
         <div>
           <p className="font-medium">{row.customerName}</p>
@@ -163,6 +167,7 @@ export function AdminOrdersTable() {
     {
       key: "payment",
       header: "Payment",
+      className: "hidden lg:table-cell",
       cell: (row) => (
         <div className="space-y-2">
           <PaymentStatusSelect order={row} onUpdated={loadItems} />
@@ -186,6 +191,10 @@ export function AdminOrdersTable() {
 
   if (loading) {
     return <AdminTableSkeleton />;
+  }
+
+  if (error) {
+    return <AdminErrorState message={error} onRetry={() => void loadItems()} />;
   }
 
   return <AdminDataTable columns={columns} data={items} emptyMessage="No orders yet." />;

@@ -1,5 +1,5 @@
-import { PageLoading } from "@/components/common/page-loading";
+import { AdminLoadingState } from "@/components/admin/admin-state";
 
 export default function AdminLoading() {
-  return <PageLoading title="Loading admin page" />;
+  return <AdminLoadingState message="Loading page..." />;
 }

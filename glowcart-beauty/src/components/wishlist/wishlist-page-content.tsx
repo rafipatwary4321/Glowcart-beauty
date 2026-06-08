@@ -97,7 +97,10 @@ export function WishlistPageContent() {
 
   if (!hydrated) {
     return (
-      <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+      <div
+        className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4"
+        data-testid="wishlist-page-loading"
+      >
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="aspect-[3/4] animate-pulse rounded-2xl bg-beige-100" />
         ))}
@@ -106,11 +109,15 @@ export function WishlistPageContent() {
   }
 
   if (items.length === 0) {
-    return <WishlistEmptyState />;
+    return (
+      <div data-testid="wishlist-page">
+        <WishlistEmptyState />
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="wishlist-page">
       <p className="text-sm text-muted-foreground">
         {items.length} {items.length === 1 ? "item" : "items"} saved
       </p>

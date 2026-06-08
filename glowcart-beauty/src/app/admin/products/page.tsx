@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
+
 import { AdminPageHeader, AdminProductsTable } from "@/components/admin";
 import { routes } from "@/constants/routes";
+
+export const metadata: Metadata = {
+  title: "Products",
+};
 
 export default function AdminProductsPage() {
   return (

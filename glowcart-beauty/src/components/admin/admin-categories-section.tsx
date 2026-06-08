@@ -12,11 +12,12 @@ import {
   type AdminTableColumn,
 } from "@/components/admin/admin-data-table";
 import { AdminTableSkeleton } from "@/components/admin/admin-table-skeleton";
+import { AdminErrorState } from "@/components/admin/admin-state";
 import { AdminImagePreview } from "@/components/admin/admin-image-preview";
 import { FormField } from "@/components/admin/form-field";
 import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,6 +43,7 @@ const defaultValues: CategoryFormValues = {
 export function AdminCategoriesSection() {
   const [items, setItems] = useState<AdminCategoryRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -61,10 +63,17 @@ export function AdminCategoriesSection() {
 
   const loadItems = useCallback(async () => {
     setLoading(true);
-    const result = await fetchAdminCategories();
-    setItems(result.data);
-    notifyFallbackRead(result.source);
-    setLoading(false);
+    setError(null);
+
+    try {
+      const result = await fetchAdminCategories();
+      setItems(result.data);
+      notifyFallbackRead(result.source);
+    } catch {
+      setError("Unable to load categories.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -160,6 +169,7 @@ export function AdminCategoriesSection() {
             className="h-8 text-destructive"
             disabled={deletingId === row.id}
             onClick={() => void handleDelete(row.id)}
+            aria-label={`Archive ${row.name}`}
           >
             {deletingId === row.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
           </Button>
@@ -174,11 +184,20 @@ export function AdminCategoriesSection() {
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-      {loading ? <AdminTableSkeleton /> : <AdminDataTable columns={columns} data={items} />}
+      {loading ? (
+        <AdminTableSkeleton />
+      ) : error ? (
+        <AdminErrorState message={error} onRetry={() => void loadItems()} />
+      ) : (
+        <div className="order-2 min-w-0 xl:order-1">
+          <AdminDataTable columns={columns} data={items} emptyMessage="No categories yet. Create one using the form." />
+        </div>
+      )}
 
-      <Card className="border-border/60">
+      <Card className="order-1 h-fit border-border/60 xl:order-2 xl:sticky xl:top-24">
         <CardHeader>
           <CardTitle>{editingId ? "Edit Category" : "Add Category"}</CardTitle>
+          <CardDescription>Organize products into browsable collections.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">

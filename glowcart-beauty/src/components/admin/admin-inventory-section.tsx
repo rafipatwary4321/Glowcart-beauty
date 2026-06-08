@@ -6,11 +6,11 @@ import { toast } from "sonner";
 
 import {
   AdminDataTable,
-  AdminPageHeader,
   AdminStatusBadge,
   AdminTableSkeleton,
   type AdminTableColumn,
 } from "@/components/admin";
+import { AdminErrorState } from "@/components/admin/admin-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -45,6 +45,7 @@ export function AdminInventorySection() {
   const [items, setItems] = useState<InventoryRow[]>([]);
   const [history, setHistory] = useState<HistoryRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [stockValue, setStockValue] = useState("");
   const [note, setNote] = useState("");
@@ -52,6 +53,7 @@ export function AdminInventorySection() {
 
   const loadData = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const [inventoryRes, historyRes] = await Promise.all([
         fetch("/api/inventory", { cache: "no-store" }),
@@ -61,7 +63,11 @@ export function AdminInventorySection() {
       const historyJson = await historyRes.json();
       if (inventoryJson.success) setItems(inventoryJson.data.items);
       if (historyJson.success) setHistory(historyJson.data.items);
+      if (!inventoryJson.success) {
+        throw new Error("Inventory request failed.");
+      }
     } catch {
+      setError("Unable to load inventory.");
       toast.error("Unable to load inventory.");
     } finally {
       setLoading(false);
@@ -170,13 +176,10 @@ export function AdminInventorySection() {
 
   return (
     <div className="space-y-8">
-      <AdminPageHeader
-        title="Inventory"
-        description="Monitor stock levels, reservations, and inventory history."
-      />
-
       {loading ? (
-        <AdminTableSkeleton />
+        <AdminTableSkeleton rows={8} />
+      ) : error ? (
+        <AdminErrorState message={error} onRetry={() => void loadData()} />
       ) : (
         <>
           <div className="grid gap-4 md:grid-cols-3">
@@ -230,7 +233,7 @@ export function AdminInventorySection() {
               />
               <Button
                 type="button"
-                className="rounded-full"
+                className="w-full rounded-full md:w-auto"
                 disabled={saving}
                 onClick={() => void handleUpdateStock()}
               >

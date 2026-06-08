@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
+
 import { AdminOrdersTable, AdminPageHeader } from "@/components/admin";
+
+export const metadata: Metadata = {
+  title: "Orders",
+};
 
 export default function AdminOrdersPage() {
   return (

@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
+
 import { AdminCouponsSection, AdminPageHeader } from "@/components/admin";
+
+export const metadata: Metadata = {
+  title: "Coupons",
+};
 
 export default function AdminCouponsPage() {
   return (

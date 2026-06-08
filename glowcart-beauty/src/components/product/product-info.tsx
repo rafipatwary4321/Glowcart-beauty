@@ -24,7 +24,7 @@ export function ProductInfo({ product, className }: ProductInfoProps) {
   const discount = calcDiscountPercent(product);
 
   return (
-    <div className={cn("space-y-6", className)}>
+    <div className={cn("space-y-6", className)} data-testid="product-info">
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <Link

@@ -3,11 +3,10 @@ import type { NextAuthConfig } from "next-auth";
 import type { UserRole } from "@/types/user";
 
 function getAuthSecret(): string {
-  return (
-    process.env.AUTH_SECRET ??
-    process.env.NEXTAUTH_SECRET ??
-    (process.env.NODE_ENV === "development" ? "glowcart-dev-auth-secret" : "")
-  );
+  const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? "";
+  if (secret) return secret;
+  if (process.env.NODE_ENV === "development") return "glowcart-dev-auth-secret";
+  return "glowcart-build-auth-secret-placeholder";
 }
 
 /**

@@ -12,11 +12,12 @@ import {
   type AdminTableColumn,
 } from "@/components/admin/admin-data-table";
 import { AdminTableSkeleton } from "@/components/admin/admin-table-skeleton";
+import { AdminErrorState } from "@/components/admin/admin-state";
 import { AdminImagePreview } from "@/components/admin/admin-image-preview";
 import { FormField } from "@/components/admin/form-field";
 import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -47,6 +48,7 @@ const defaultValues: BannerFormValues = {
 export function AdminBannersSection() {
   const [items, setItems] = useState<AdminBannerRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -59,10 +61,17 @@ export function AdminBannersSection() {
 
   const loadItems = useCallback(async () => {
     setLoading(true);
-    const result = await fetchAdminBanners();
-    setItems(result.data);
-    notifyFallbackRead(result.source);
-    setLoading(false);
+    setError(null);
+
+    try {
+      const result = await fetchAdminBanners();
+      setItems(result.data);
+      notifyFallbackRead(result.source);
+    } catch {
+      setError("Unable to load banners.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -74,7 +83,7 @@ export function AdminBannersSection() {
     reset({
       title: row.title,
       subtitle: row.subtitle ?? "",
-      description: "",
+      description: row.description ?? "",
       type: row.type,
       imageUrl: row.imageUrl ?? "",
       imageGradient: row.imageGradient,
@@ -161,7 +170,7 @@ export function AdminBannersSection() {
       cell: (row) => (
         <div className="flex items-center justify-end gap-1">
           <AdminTableActions onEdit={() => startEdit(row)} />
-          <Button variant="ghost" size="sm" className="h-8 text-destructive" disabled={deletingId === row.id} onClick={() => void handleDelete(row.id)}>
+          <Button variant="ghost" size="sm" className="h-8 text-destructive" disabled={deletingId === row.id} onClick={() => void handleDelete(row.id)} aria-label={`Archive ${row.title}`}>
             {deletingId === row.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
           </Button>
         </div>
@@ -175,10 +184,19 @@ export function AdminBannersSection() {
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-      {loading ? <AdminTableSkeleton /> : <AdminDataTable columns={columns} data={items} />}
-      <Card className="border-border/60">
+      {loading ? (
+        <AdminTableSkeleton />
+      ) : error ? (
+        <AdminErrorState message={error} onRetry={() => void loadItems()} />
+      ) : (
+        <div className="order-2 min-w-0 xl:order-1">
+          <AdminDataTable columns={columns} data={items} emptyMessage="No banners yet. Create one using the form." />
+        </div>
+      )}
+      <Card className="order-1 h-fit border-border/60 xl:order-2 xl:sticky xl:top-24">
         <CardHeader>
           <CardTitle>{editingId ? "Edit Banner" : "Add Banner"}</CardTitle>
+          <CardDescription>Create homepage hero, promo, and announcement banners.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
@@ -194,6 +212,15 @@ export function AdminBannersSection() {
                 <option value="promo">Promo</option>
                 <option value="announcement">Announcement</option>
               </Select>
+            </FormField>
+            <FormField label="Sort order" htmlFor="sortOrder" error={errors.sortOrder?.message}>
+              <Input
+                id="sortOrder"
+                type="number"
+                min={0}
+                className="h-10 rounded-lg"
+                {...register("sortOrder", { valueAsNumber: true })}
+              />
             </FormField>
             <FormField label="Description" htmlFor="description" error={errors.description?.message}>
               <Textarea id="description" {...register("description")} />

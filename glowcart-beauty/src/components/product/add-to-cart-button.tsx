@@ -39,6 +39,7 @@ export function AddToCartButton({
       )}
       disabled={!product.inStock}
       onClick={() => addToCart(product, quantity)}
+      data-testid="add-to-cart"
     >
       {showIcon && <ShoppingBag className="size-4" />}
       {label}

@@ -10,9 +10,9 @@ import {
   type AdminTableColumn,
 } from "@/components/admin/admin-data-table";
 import { AdminTableSkeleton } from "@/components/admin/admin-table-skeleton";
+import { AdminErrorState } from "@/components/admin/admin-state";
 import { AdminImagePreview } from "@/components/admin/admin-image-preview";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { routes } from "@/constants/routes";
 import { deleteAdminBlog, fetchAdminBlog, fetchAdminBlogs, updateAdminBlog } from "@/lib/admin/services";
 import { notifyFallbackRead, notifyMutationResult } from "@/lib/admin/toast";
@@ -21,15 +21,23 @@ import type { AdminBlogRow } from "@/types/admin";
 export function AdminBlogsTable() {
   const [items, setItems] = useState<AdminBlogRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const loadItems = useCallback(async () => {
     setLoading(true);
-    const result = await fetchAdminBlogs();
-    setItems(result.data);
-    notifyFallbackRead(result.source);
-    setLoading(false);
+    setError(null);
+
+    try {
+      const result = await fetchAdminBlogs();
+      setItems(result.data);
+      notifyFallbackRead(result.source);
+    } catch {
+      setError("Unable to load blog posts.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -98,8 +106,8 @@ export function AdminBlogsTable() {
         </div>
       ),
     },
-    { key: "category", header: "Category", cell: (row) => row.category },
-    { key: "author", header: "Author", cell: (row) => row.author },
+    { key: "category", header: "Category", className: "hidden md:table-cell", cell: (row) => row.category },
+    { key: "author", header: "Author", className: "hidden lg:table-cell", cell: (row) => row.author },
     {
       key: "status",
       header: "Status",
@@ -139,6 +147,7 @@ export function AdminBlogsTable() {
             className="h-8 rounded-full px-3 text-destructive hover:text-destructive"
             disabled={deletingId === row.id}
             onClick={() => void handleDelete(row.id)}
+            aria-label={`Delete ${row.title}`}
           >
             {deletingId === row.id ? (
               <Loader2 className="size-4 animate-spin" />
@@ -153,17 +162,9 @@ export function AdminBlogsTable() {
 
   if (loading) return <AdminTableSkeleton rows={5} />;
 
-  return (
-    <Card className="border-border/60">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>All Blog Posts</CardTitle>
-        <Button asChild className="rounded-full" size="sm">
-          <Link href={routes.admin.blogsNew}>New Post</Link>
-        </Button>
-      </CardHeader>
-      <CardContent>
-        <AdminDataTable columns={columns} data={items} emptyMessage="No blog posts yet." />
-      </CardContent>
-    </Card>
-  );
+  if (error) {
+    return <AdminErrorState message={error} onRetry={() => void loadItems()} />;
+  }
+
+  return <AdminDataTable columns={columns} data={items} emptyMessage="No blog posts yet." />;
 }

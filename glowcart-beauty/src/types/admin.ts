@@ -34,6 +34,9 @@ export type AdminProductRow = {
   inStock: boolean;
   skinConcerns: string[];
   badge?: string;
+  description?: string;
+  ingredients?: string;
+  howToUse?: string;
   imageGradient: string;
   images?: string[];
   isActive: boolean;
@@ -76,6 +79,7 @@ export type AdminBannerRow = {
   id: string;
   title: string;
   subtitle?: string;
+  description?: string;
   type: "hero" | "promo" | "announcement";
   ctaLabel?: string;
   ctaHref?: string;
@@ -92,6 +96,7 @@ export type AdminCouponRow = {
   discountType: "percentage" | "fixed";
   discountValue: number;
   minOrderAmount: number;
+  maxDiscountAmount?: number;
   usageCount: number;
   usageLimit?: number;
   expiresAt?: string;
