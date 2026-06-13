@@ -1,4 +1,4 @@
-import { ApiRouteError, apiSuccess, withDb } from "@/lib/api";
+import { ApiRouteError, apiError, apiSuccess, withDb } from "@/lib/api";
 import {
   isBannerActive,
   serializeBanner,
@@ -14,18 +14,32 @@ export const GET = withDb(async (request: Request) => {
   const isAdmin = searchParams.get("admin") === "true";
   const type = searchParams.get("type");
 
-  const filter: Record<string, unknown> = isAdmin ? {} : { isActive: true };
-  if (type) filter.type = type;
+  try {
+    const filter: Record<string, unknown> = isAdmin ? {} : { isActive: true };
+    if (type) filter.type = type;
 
-  const banners = await Banner.find(filter).sort({ sortOrder: 1, createdAt: -1 }).lean();
-  const serialized = serializeBanners(banners);
+    const banners = await Banner.find(filter).sort({ sortOrder: 1, createdAt: -1 }).lean();
+    const serialized = serializeBanners(banners);
 
-  if (isAdmin) {
-    return apiSuccess(serialized);
+    if (isAdmin) {
+      return apiSuccess(serialized);
+    }
+
+    const activeBanners = serialized.filter((banner) => isBannerActive(banner));
+    return apiSuccess(activeBanners);
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("[api/banners] GET failed:", error);
+    }
+
+    return apiError("Failed to load banners", {
+      status: 500,
+      details:
+        process.env.NODE_ENV === "development" && error instanceof Error
+          ? error.message
+          : undefined,
+    });
   }
-
-  const activeBanners = serialized.filter((banner) => isBannerActive(banner));
-  return apiSuccess(activeBanners);
 });
 
 export const POST = withDb(async (request: Request) => {

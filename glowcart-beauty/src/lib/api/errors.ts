@@ -24,15 +24,24 @@ export function getErrorMessage(error: unknown): string {
   return "An unexpected error occurred.";
 }
 
+function isDbConnectionFailure(error: unknown): boolean {
+  if (error instanceof DbConnectionError) return true;
+  if (error instanceof Error && error.name === "DbConnectionError") return true;
+  if (
+    error instanceof Error &&
+    /mongodb|could not connect to mongodb|mongod_uri|server selection/i.test(error.message)
+  ) {
+    return true;
+  }
+  return false;
+}
+
 export function getErrorStatus(error: unknown): number {
   if (error instanceof ApiRouteError) {
     return error.status;
   }
 
-  if (
-    error instanceof DbConnectionError ||
-    (error instanceof Error && error.name === "DbConnectionError")
-  ) {
+  if (isDbConnectionFailure(error)) {
     return 503;
   }
 

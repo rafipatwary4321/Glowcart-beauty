@@ -8,6 +8,10 @@ import {
   SkinConcernGridSkeleton,
 } from "@/components/home/skeletons";
 import { HomeSectionBoundary } from "@/components/home/home-section-boundary";
+import {
+  HeroBannerSkeleton,
+  PromoBannerSkeleton,
+} from "@/components/home/hero-banner-skeleton";
 import { heroContent } from "@/data/hero";
 import { featuredPromotion } from "@/data/promotions";
 import { getHeroContent, getPromoContent } from "@/services/homepage.service";
@@ -23,7 +27,7 @@ import { TrendingProductsSection } from "./trending-products-section";
 async function HeroSection() {
   try {
     const content = await getHeroContent();
-    return <HeroBanner content={content} />;
+    return <HeroBanner content={content ?? heroContent} />;
   } catch {
     return <HeroBanner content={heroContent} />;
   }
@@ -32,7 +36,7 @@ async function HeroSection() {
 async function PromoSection() {
   try {
     const promotion = await getPromoContent();
-    return <PromotionalBannerSection promotion={promotion} />;
+    return <PromotionalBannerSection promotion={promotion ?? featuredPromotion} />;
   } catch {
     return <PromotionalBannerSection promotion={featuredPromotion} />;
   }
@@ -46,7 +50,7 @@ export async function HomepageSections() {
   return (
     <>
       <HomeSectionBoundary fallback={<HeroBanner content={heroContent} />}>
-        <Suspense fallback={<HeroSectionFallback />}>
+        <Suspense fallback={<HeroBannerSkeleton />}>
           <HeroSection />
         </Suspense>
       </HomeSectionBoundary>
@@ -104,41 +108,13 @@ export async function HomepageSections() {
       </HomeSectionBoundary>
 
       <HomeSectionBoundary fallback={<PromotionalBannerSection promotion={featuredPromotion} />}>
-        <Suspense fallback={<PromoSectionFallback />}>
+        <Suspense fallback={<PromoBannerSkeleton />}>
           <PromoSection />
         </Suspense>
       </HomeSectionBoundary>
 
       <NewsletterSection />
     </>
-  );
-}
-
-function HeroSectionFallback() {
-  return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-rose-50 via-beige-50 to-white py-8 sm:py-10 lg:py-12">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-6 w-32 rounded-full bg-muted" />
-          <div className="h-12 max-w-lg rounded-lg bg-muted" />
-          <div className="h-4 max-w-md rounded bg-muted" />
-          <div className="flex gap-3">
-            <div className="h-11 w-36 rounded-full bg-muted" />
-            <div className="h-11 w-36 rounded-full bg-muted" />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function PromoSectionFallback() {
-  return (
-    <section className="py-8 sm:py-10">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="h-40 animate-pulse rounded-3xl bg-muted" />
-      </div>
-    </section>
   );
 }
 

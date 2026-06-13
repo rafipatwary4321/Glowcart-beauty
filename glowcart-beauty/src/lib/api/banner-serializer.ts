@@ -22,7 +22,7 @@ export type SerializedBanner = {
 };
 
 type BannerLike = Record<string, unknown> & {
-  _id?: Types.ObjectId | string;
+  _id?: Types.ObjectId | string | { toString(): string };
   id?: string;
 };
 
@@ -36,7 +36,46 @@ function normalizeBannerType(value: unknown): SerializedBanner["type"] {
 function toIsoString(value: unknown): string | undefined {
   if (!value) return undefined;
   if (value instanceof Date) return value.toISOString();
+  const parsed = new Date(String(value));
+  if (Number.isNaN(parsed.getTime())) return undefined;
+  return parsed.toISOString();
+}
+
+function toIdString(value: unknown): string {
+  if (value == null) return "";
+
+  if (typeof value === "string") return value;
+
+  if (typeof value === "object") {
+    const objectValue = value as {
+      toHexString?: () => string;
+      toString?: () => string;
+    };
+
+    if (typeof objectValue.toHexString === "function") {
+      return objectValue.toHexString();
+    }
+
+    if (typeof objectValue.toString === "function") {
+      const asString = objectValue.toString();
+      if (asString && asString !== "[object Object]") {
+        return asString;
+      }
+    }
+  }
+
   return String(value);
+}
+
+function toOptionalString(value: unknown): string | undefined {
+  if (value == null) return undefined;
+  const text = String(value).trim();
+  return text.length > 0 ? text : undefined;
+}
+
+function toNumber(value: unknown, fallback = 0): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function toPlainBanner(doc: BannerLike | Document | null): BannerLike | null {
@@ -50,33 +89,41 @@ function toPlainBanner(doc: BannerLike | Document | null): BannerLike | null {
 }
 
 export function serializeBanner(doc: BannerLike | Document | null): SerializedBanner | null {
-  const plain = toPlainBanner(doc);
-  if (!plain) return null;
+  try {
+    const plain = toPlainBanner(doc);
+    if (!plain) return null;
 
-  const id = plain._id ? String(plain._id) : plain.id ? String(plain.id) : "";
-  if (!id) return null;
+    const id = toIdString(plain._id ?? plain.id);
+    if (!id) return null;
 
-  return {
-    id,
-    title: String(plain.title ?? ""),
-    subtitle: plain.subtitle ? String(plain.subtitle) : undefined,
-    description: String(plain.description ?? ""),
-    type: normalizeBannerType(plain.type),
-    imageUrl: plain.imageUrl ? String(plain.imageUrl) : undefined,
-    imageGradient: String(plain.imageGradient ?? "from-rose-100 to-pink-50"),
-    ctaLabel: plain.ctaLabel ? String(plain.ctaLabel) : undefined,
-    ctaHref: plain.ctaHref ? String(plain.ctaHref) : undefined,
-    badge: plain.badge ? String(plain.badge) : undefined,
-    sortOrder: Number(plain.sortOrder ?? 0),
-    isActive: plain.isActive !== false,
-    startsAt: toIsoString(plain.startsAt),
-    expiresAt: toIsoString(plain.expiresAt),
-    createdAt: toIsoString(plain.createdAt),
-    updatedAt: toIsoString(plain.updatedAt),
-  };
+    return {
+      id,
+      title: String(plain.title ?? ""),
+      subtitle: toOptionalString(plain.subtitle),
+      description: String(plain.description ?? ""),
+      type: normalizeBannerType(plain.type),
+      imageUrl: toOptionalString(plain.imageUrl),
+      imageGradient: String(plain.imageGradient ?? "from-rose-100 to-pink-50"),
+      ctaLabel: toOptionalString(plain.ctaLabel),
+      ctaHref: toOptionalString(plain.ctaHref),
+      badge: toOptionalString(plain.badge),
+      sortOrder: toNumber(plain.sortOrder, 0),
+      isActive: plain.isActive !== false,
+      startsAt: toIsoString(plain.startsAt),
+      expiresAt: toIsoString(plain.expiresAt),
+      createdAt: toIsoString(plain.createdAt),
+      updatedAt: toIsoString(plain.updatedAt),
+    };
+  } catch {
+    return null;
+  }
 }
 
-export function serializeBanners(docs: Array<BannerLike | Document>): SerializedBanner[] {
+export function serializeBanners(docs: Array<BannerLike | Document> | null | undefined): SerializedBanner[] {
+  if (!Array.isArray(docs) || docs.length === 0) {
+    return [];
+  }
+
   return docs
     .map((doc) => serializeBanner(doc))
     .filter((banner): banner is SerializedBanner => banner !== null);
