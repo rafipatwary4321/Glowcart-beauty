@@ -65,7 +65,7 @@ export function AdminBannersSection() {
 
     try {
       const result = await fetchAdminBanners();
-      setItems(result.data);
+      setItems(Array.isArray(result.data) ? result.data : []);
       notifyFallbackRead(result.source);
     } catch {
       setError("Unable to load banners.");

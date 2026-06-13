@@ -23,12 +23,17 @@ const playfair = Playfair_Display({
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
-  return buildPageMetadata({
+  const metadata = buildPageMetadata({
     title: settings.websiteName,
     description: settings.description,
     path: "/",
     image: settings.logoUrl,
   });
+
+  return {
+    ...metadata,
+    icons: settings.faviconUrl ? { icon: settings.faviconUrl } : metadata.icons,
+  };
 }
 
 export default async function RootLayout({

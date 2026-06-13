@@ -19,7 +19,7 @@ import {
 } from "@/lib/catalog/service";
 import { buildPageMetadata } from "@/lib/seo";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 type ProductDetailPageProps = {
   params: Promise<{ slug: string }>;

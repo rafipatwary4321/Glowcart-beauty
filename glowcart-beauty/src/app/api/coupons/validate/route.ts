@@ -21,26 +21,16 @@ function isCouponValid(coupon: {
   return true;
 }
 
-export const POST = withDb(async (request: Request) => {
-  const body = (await request.json()) as {
-    code?: string;
-    orderAmount?: number;
-  };
-
-  if (!body.code?.trim()) {
-    throw new ApiRouteError("Coupon code is required.", 400);
-  }
-
-  const coupon = await Coupon.findOne({
-    code: body.code.trim().toUpperCase(),
-  });
-
-  if (!coupon || !isCouponValid(coupon)) {
-    throw new ApiRouteError("Invalid or expired coupon.", 404);
-  }
-
-  const orderAmount = body.orderAmount ?? 0;
-
+function calculateCouponDiscount(
+  coupon: {
+    discountType: string;
+    discountValue: number;
+    maxDiscountAmount?: number | null;
+    minOrderAmount?: number | null;
+    code: string;
+  },
+  orderAmount: number
+) {
   if (orderAmount < (coupon.minOrderAmount ?? 0)) {
     throw new ApiRouteError(
       `Minimum order amount is ৳${coupon.minOrderAmount}.`,
@@ -57,11 +47,45 @@ export const POST = withDb(async (request: Request) => {
     discount = Math.min(discount, coupon.maxDiscountAmount);
   }
 
-  return apiSuccess({
+  return {
     code: coupon.code,
     discountType: coupon.discountType,
     discountValue: coupon.discountValue,
     calculatedDiscount: Math.round(discount),
     minOrderAmount: coupon.minOrderAmount,
+  };
+}
+
+async function validateCouponRequest(code: string | undefined, orderAmount: number) {
+  if (!code?.trim()) {
+    throw new ApiRouteError("Coupon code is required.", 400);
+  }
+
+  const coupon = await Coupon.findOne({
+    code: code.trim().toUpperCase(),
   });
+
+  if (!coupon || !isCouponValid(coupon)) {
+    throw new ApiRouteError("Invalid or expired coupon.", 404);
+  }
+
+  return calculateCouponDiscount(coupon, orderAmount);
+}
+
+export const GET = withDb(async (request: Request) => {
+  const { searchParams } = new URL(request.url);
+  const code = searchParams.get("code") ?? undefined;
+  const orderAmount = Number(searchParams.get("orderAmount") ?? 0);
+  const result = await validateCouponRequest(code, orderAmount);
+  return apiSuccess(result);
+});
+
+export const POST = withDb(async (request: Request) => {
+  const body = (await request.json()) as {
+    code?: string;
+    orderAmount?: number;
+  };
+
+  const result = await validateCouponRequest(body.code, body.orderAmount ?? 0);
+  return apiSuccess(result);
 });

@@ -1,11 +1,16 @@
 import { featuredCategories } from "@/data/categories";
 import { heroContent } from "@/data/hero";
 import { featuredPromotion } from "@/data/promotions";
-import { products as staticProducts, getProductBySlug as getStaticProductBySlug, getRelatedProducts as getStaticRelatedProducts } from "@/data/products";
+import {
+  products as staticProducts,
+  getProductBySlug as getStaticProductBySlug,
+  getRelatedProducts as getStaticRelatedProducts,
+} from "@/data/products";
 import { topBrands as staticBrands } from "@/data/brands";
 import { trendingProducts as staticTrendingProducts } from "@/data/trending-products";
 import { serializeDocuments } from "@/lib/api";
-import { connectDB } from "@/lib/db";
+import { serializeBanner } from "@/lib/api/banner-serializer";
+import { getCatalogDbState } from "@/lib/catalog/db-state";
 import {
   mapBrandDocument,
   mapCategoryDocument,
@@ -13,6 +18,7 @@ import {
   mapProductDocument,
   mapPromoBanner,
 } from "@/lib/catalog/mappers";
+import { connectDB } from "@/lib/db";
 import { Banner, Brand, Category, Product } from "@/models";
 import type { Brand as BrandType } from "@/types/brand";
 import type { HeroContent, Promotion } from "@/types/homepage";
@@ -40,16 +46,24 @@ async function fetchActiveProducts(filter: Record<string, unknown> = {}) {
 }
 
 export async function getPublicProducts(): Promise<ProductType[]> {
-  try {
-    const items = await fetchActiveProducts();
-    if (items.length > 0) return items;
-  } catch {
-    // fall through to static catalog
+  const db = await getCatalogDbState();
+  if (!db.connected || !db.hasProducts) {
+    return staticProducts;
   }
-  return staticProducts;
+
+  try {
+    return await fetchActiveProducts();
+  } catch {
+    return staticProducts;
+  }
 }
 
 export async function getPublicProductBySlug(slug: string): Promise<ProductType | null> {
+  const db = await getCatalogDbState();
+  if (!db.connected || !db.hasProducts) {
+    return getStaticProductBySlug(slug) ?? null;
+  }
+
   try {
     await connectDB();
     const doc = await Product.findOne({ slug: slug.toLowerCase(), isActive: true })
@@ -59,17 +73,21 @@ export async function getPublicProductBySlug(slug: string): Promise<ProductType 
     if (doc) {
       return mapProductDocument(serializeDocuments([doc])[0]!);
     }
+    return null;
   } catch {
-    // fall through
+    return getStaticProductBySlug(slug) ?? null;
   }
-
-  return getStaticProductBySlug(slug) ?? null;
 }
 
 export async function getPublicRelatedProducts(
   product: ProductType,
   limit = 4
 ): Promise<ProductType[]> {
+  const db = await getCatalogDbState();
+  if (!db.connected || !db.hasProducts) {
+    return getStaticRelatedProducts(product, limit);
+  }
+
   try {
     await connectDB();
     const category = await Category.findOne({ slug: product.categorySlug }).select("_id");
@@ -87,141 +105,184 @@ export async function getPublicRelatedProducts(
         return serializeDocuments(docs).map((doc) => mapProductDocument(doc));
       }
     }
+    return [];
   } catch {
-    // fall through
+    return getStaticRelatedProducts(product, limit);
   }
-
-  return getStaticRelatedProducts(product, limit);
 }
 
 export async function getPublicProductsByCategorySlug(slug: string): Promise<ProductType[]> {
-  try {
-    await connectDB();
-    const category = await Category.findOne({ slug: slug.toLowerCase(), isActive: true }).select("_id");
-    if (category) {
-      return fetchActiveProducts({ category: category._id });
-    }
-  } catch {
-    // fall through
+  const db = await getCatalogDbState();
+  if (!db.connected || !db.hasCategories) {
+    return staticProducts.filter(
+      (product) =>
+        product.categorySlug === slug ||
+        product.category.toLowerCase().replace(/\s+/g, "-") === slug
+    );
   }
 
-  return staticProducts.filter(
-    (product) =>
-      product.categorySlug === slug ||
-      product.category.toLowerCase().replace(/\s+/g, "-") === slug
-  );
+  try {
+    await connectDB();
+    const category = await Category.findOne({
+      slug: slug.toLowerCase(),
+      isActive: true,
+    }).select("_id");
+    if (!category) return [];
+    return fetchActiveProducts({ category: category._id });
+  } catch {
+    return staticProducts.filter(
+      (product) =>
+        product.categorySlug === slug ||
+        product.category.toLowerCase().replace(/\s+/g, "-") === slug
+    );
+  }
 }
 
 export async function getPublicProductsByBrandSlug(slug: string): Promise<ProductType[]> {
+  const db = await getCatalogDbState();
+  if (!db.connected || !db.hasBrands) {
+    return staticProducts.filter(
+      (product) =>
+        product.brandSlug === slug ||
+        product.brand.toLowerCase().replace(/\s+/g, "-") === slug
+    );
+  }
+
   try {
     await connectDB();
     const brand = await Brand.findOne({ slug: slug.toLowerCase(), isActive: true }).select("_id");
-    if (brand) {
-      return fetchActiveProducts({ brand: brand._id });
-    }
+    if (!brand) return [];
+    return fetchActiveProducts({ brand: brand._id });
   } catch {
-    // fall through
+    return staticProducts.filter(
+      (product) =>
+        product.brandSlug === slug ||
+        product.brand.toLowerCase().replace(/\s+/g, "-") === slug
+    );
   }
-
-  return staticProducts.filter(
-    (product) =>
-      product.brandSlug === slug ||
-      product.brand.toLowerCase().replace(/\s+/g, "-") === slug
-  );
 }
 
 export async function getPublicCategories(): Promise<CategoryType[]> {
+  const db = await getCatalogDbState();
+  if (!db.connected || !db.hasCategories) {
+    return featuredCategories;
+  }
+
   try {
     await connectDB();
     const docs = await Category.find({ isActive: true }).sort({ sortOrder: 1, name: 1 });
-    if (docs.length > 0) {
-      return serializeDocuments(docs).map((doc) => mapCategoryDocument(doc));
-    }
+    return serializeDocuments(docs).map((doc) => mapCategoryDocument(doc));
   } catch {
-    // fall through
+    return featuredCategories;
   }
-  return featuredCategories;
 }
 
 export async function getPublicCategoryBySlug(slug: string) {
+  const db = await getCatalogDbState();
+  if (!db.connected || !db.hasCategories) {
+    const fallback = featuredCategories.find((item) => item.slug === slug);
+    if (!fallback) return null;
+    return {
+      name: fallback.name,
+      slug: fallback.slug,
+      description: fallback.description,
+    };
+  }
+
   try {
     await connectDB();
     const category = await Category.findOne({ slug: slug.toLowerCase(), isActive: true });
-    if (category) {
-      return {
-        name: category.name,
-        slug: category.slug,
-        description: category.description || `Shop ${category.name} at GlowCart Beauty.`,
-        imageUrl: category.imageUrl,
-      };
-    }
+    if (!category) return null;
+
+    return {
+      name: category.name,
+      slug: category.slug,
+      description: category.description || `Shop ${category.name} at GlowCart Beauty.`,
+      imageUrl: category.imageUrl,
+    };
   } catch {
-    // fall through
+    const fallback = featuredCategories.find((item) => item.slug === slug);
+    if (!fallback) return null;
+    return {
+      name: fallback.name,
+      slug: fallback.slug,
+      description: fallback.description,
+    };
   }
-
-  const fallback = featuredCategories.find((item) => item.slug === slug);
-  if (!fallback) return null;
-
-  return {
-    name: fallback.name,
-    slug: fallback.slug,
-    description: fallback.description,
-  };
 }
 
 export async function getPublicBrands(): Promise<BrandType[]> {
+  const db = await getCatalogDbState();
+  if (!db.connected || !db.hasBrands) {
+    return staticBrands;
+  }
+
   try {
     await connectDB();
     const docs = await Brand.find({ isActive: true }).sort({ name: 1 });
-    if (docs.length > 0) {
-      return serializeDocuments(docs).map((doc) => mapBrandDocument(doc));
-    }
+    return serializeDocuments(docs).map((doc) => mapBrandDocument(doc));
   } catch {
-    // fall through
+    return staticBrands;
   }
-  return staticBrands;
 }
 
 export async function getPublicBrandBySlug(slug: string) {
+  const db = await getCatalogDbState();
+  if (!db.connected || !db.hasBrands) {
+    const fallback = staticBrands.find((item) => item.slug === slug);
+    if (!fallback) return null;
+    return {
+      name: fallback.name,
+      slug: fallback.slug,
+      description: fallback.tagline,
+    };
+  }
+
   try {
     await connectDB();
     const brand = await Brand.findOne({ slug: slug.toLowerCase(), isActive: true });
-    if (brand) {
-      return {
-        name: brand.name,
-        slug: brand.slug,
-        description: brand.tagline || `Discover ${brand.name} at GlowCart Beauty.`,
-        imageUrl: brand.imageUrl,
-      };
-    }
+    if (!brand) return null;
+
+    return {
+      name: brand.name,
+      slug: brand.slug,
+      description: brand.tagline || `Discover ${brand.name} at GlowCart Beauty.`,
+      imageUrl: brand.imageUrl,
+    };
   } catch {
-    // fall through
+    const fallback = staticBrands.find((item) => item.slug === slug);
+    if (!fallback) return null;
+    return {
+      name: fallback.name,
+      slug: fallback.slug,
+      description: fallback.tagline,
+    };
   }
-
-  const fallback = staticBrands.find((item) => item.slug === slug);
-  if (!fallback) return null;
-
-  return {
-    name: fallback.name,
-    slug: fallback.slug,
-    description: fallback.tagline,
-  };
 }
 
 export async function getPublicTrendingProducts(): Promise<ProductType[]> {
+  const db = await getCatalogDbState();
+  if (!db.connected || !db.hasProducts) {
+    return staticTrendingProducts;
+  }
+
   try {
     const all = await fetchActiveProducts();
-    if (all.length > 0) {
-      const trending = all.filter((product) => product.badge === "Bestseller" || product.badge === "New");
-      return (trending.length > 0 ? trending : all).slice(0, 8);
-    }
+    const trending = all.filter(
+      (product) => product.badge === "Bestseller" || product.badge === "New"
+    );
+    return (trending.length > 0 ? trending : all).slice(0, 8);
   } catch {
-    // fall through
+    return staticTrendingProducts;
   }
-  return staticTrendingProducts;
 }
 
 export async function getPublicHeroContent(): Promise<HeroContent> {
+  const db = await getCatalogDbState();
+  if (!db.connected || !db.hasHeroBanners) {
+    return heroContent;
+  }
+
   try {
     await connectDB();
     const banner = await Banner.findOne({ type: "hero", isActive: true }).sort({
@@ -230,15 +291,23 @@ export async function getPublicHeroContent(): Promise<HeroContent> {
     });
 
     if (banner && isActiveBanner(banner)) {
-      return mapHeroBanner(serializeDocuments([banner])[0]!, heroContent.stats);
+      const serialized = serializeBanner(banner);
+      if (serialized) {
+        return mapHeroBanner(serialized, heroContent.stats);
+      }
     }
+    return heroContent;
   } catch {
-    // fall through
+    return heroContent;
   }
-  return heroContent;
 }
 
 export async function getPublicPromoContent(): Promise<Promotion> {
+  const db = await getCatalogDbState();
+  if (!db.connected || !db.hasPromoBanners) {
+    return featuredPromotion;
+  }
+
   try {
     await connectDB();
     const banner = await Banner.findOne({ type: "promo", isActive: true }).sort({
@@ -247,12 +316,15 @@ export async function getPublicPromoContent(): Promise<Promotion> {
     });
 
     if (banner && isActiveBanner(banner)) {
-      return mapPromoBanner(serializeDocuments([banner])[0]!);
+      const serialized = serializeBanner(banner);
+      if (serialized) {
+        return mapPromoBanner(serialized);
+      }
     }
+    return featuredPromotion;
   } catch {
-    // fall through
+    return featuredPromotion;
   }
-  return featuredPromotion;
 }
 
 export function toCategoryOptions(categories: CategoryType[]) {

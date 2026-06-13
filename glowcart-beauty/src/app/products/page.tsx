@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { CatalogEmptyState } from "@/components/catalog";
 import { Container } from "@/components/common/container";
 import { ProductListing } from "@/components/product";
 import {
@@ -11,7 +12,7 @@ import {
 } from "@/lib/catalog/service";
 import { buildPageMetadata } from "@/lib/seo";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "All Products",
@@ -53,22 +54,29 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           </p>
         </div>
 
-        <ProductListing
-          products={products}
-          categories={toCategoryOptions(categories)}
-          brands={toBrandOptions(brands)}
-          initialFilters={{
-            category: params.category ?? "",
-            brand: params.brand ?? "",
-            skinConcern: params.concern ?? "",
-            sort:
-              params.sort === "price-asc" ||
-              params.sort === "price-desc" ||
-              params.sort === "discount"
-                ? params.sort
-                : "latest",
-          }}
-        />
+        {products.length === 0 ? (
+          <CatalogEmptyState
+            title="No products available yet"
+            description="Check back soon — new products are being added to the collection."
+          />
+        ) : (
+          <ProductListing
+            products={products}
+            categories={toCategoryOptions(categories)}
+            brands={toBrandOptions(brands)}
+            initialFilters={{
+              category: params.category ?? "",
+              brand: params.brand ?? "",
+              skinConcern: params.concern ?? "",
+              sort:
+                params.sort === "price-asc" ||
+                params.sort === "price-desc" ||
+                params.sort === "discount"
+                  ? params.sort
+                  : "latest",
+            }}
+          />
+        )}
       </Container>
     </section>
   );

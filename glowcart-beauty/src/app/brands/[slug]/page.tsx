@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { CatalogEmptyState } from "@/components/catalog";
 import { Container } from "@/components/common/container";
 import { ProductListing } from "@/components/product";
 import {
@@ -13,7 +14,7 @@ import {
 } from "@/lib/catalog/service";
 import { buildPageMetadata } from "@/lib/seo";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 type BrandPageProps = {
   params: Promise<{ slug: string }>;
@@ -53,12 +54,21 @@ export default async function BrandPage({ params }: BrandPageProps) {
           </h1>
           <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">{brand.description}</p>
         </div>
-        <ProductListing
-          products={products}
-          categories={toCategoryOptions(categories)}
-          brands={toBrandOptions(brands)}
-          initialFilters={{ category: "", brand: brand.slug, skinConcern: "", sort: "latest" }}
-        />
+        {products.length === 0 ? (
+          <CatalogEmptyState
+            title={`No products from ${brand.name} yet`}
+            description="Products from this brand will appear here once they are published."
+            actionLabel="Browse all products"
+            actionHref="/products"
+          />
+        ) : (
+          <ProductListing
+            products={products}
+            categories={toCategoryOptions(categories)}
+            brands={toBrandOptions(brands)}
+            initialFilters={{ category: "", brand: brand.slug, skinConcern: "", sort: "latest" }}
+          />
+        )}
       </Container>
     </section>
   );

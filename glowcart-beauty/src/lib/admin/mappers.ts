@@ -76,13 +76,19 @@ export function mapApiBrand(item: Record<string, unknown>): AdminBrandRow {
   };
 }
 
+function normalizeBannerType(value: unknown): AdminBannerRow["type"] {
+  const type = String(value ?? "promo");
+  if (type === "hero" || type === "promo" || type === "announcement") return type;
+  return "promo";
+}
+
 export function mapApiBanner(item: Record<string, unknown>): AdminBannerRow {
   return {
-    id: String(item.id),
-    title: String(item.title),
+    id: String(item.id ?? ""),
+    title: String(item.title ?? ""),
     subtitle: item.subtitle ? String(item.subtitle) : undefined,
     description: item.description ? String(item.description) : undefined,
-    type: item.type as AdminBannerRow["type"],
+    type: normalizeBannerType(item.type),
     ctaLabel: item.ctaLabel ? String(item.ctaLabel) : undefined,
     ctaHref: item.ctaHref ? String(item.ctaHref) : undefined,
     imageUrl: item.imageUrl ? String(item.imageUrl) : undefined,

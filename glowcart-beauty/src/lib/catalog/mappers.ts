@@ -84,13 +84,12 @@ export function mapHeroBanner(
   fallbackStats: HeroContent["stats"]
 ): HeroContent {
   const title = String(banner.title ?? "");
-  const parts = title.split(/\s+/);
-  const splitAt = Math.max(1, Math.ceil(parts.length / 2));
-  const titleMain = parts.slice(0, splitAt).join(" ");
-  const titleAccent = parts.slice(splitAt).join(" ") || String(banner.subtitle ?? "");
+  const subtitle = String(banner.subtitle ?? "");
+  const titleMain = title;
+  const titleAccent = subtitle;
 
   return {
-    badge: String(banner.badge ?? banner.subtitle ?? "Featured"),
+    badge: String(banner.badge ?? "Featured"),
     title: titleMain,
     titleAccent,
     description: String(

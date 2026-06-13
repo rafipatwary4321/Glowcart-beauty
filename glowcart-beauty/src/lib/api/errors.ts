@@ -29,7 +29,10 @@ export function getErrorStatus(error: unknown): number {
     return error.status;
   }
 
-  if (error instanceof DbConnectionError) {
+  if (
+    error instanceof DbConnectionError ||
+    (error instanceof Error && error.name === "DbConnectionError")
+  ) {
     return 503;
   }
 

@@ -1,4 +1,9 @@
-import { ApiRouteError, apiSuccess, serializeDocuments, withDb } from "@/lib/api";
+import { ApiRouteError, apiSuccess, withDb } from "@/lib/api";
+import {
+  isBannerActive,
+  serializeBanner,
+  serializeBanners,
+} from "@/lib/api/banner-serializer";
 
 export const runtime = "nodejs";
 
@@ -12,21 +17,15 @@ export const GET = withDb(async (request: Request) => {
   const filter: Record<string, unknown> = isAdmin ? {} : { isActive: true };
   if (type) filter.type = type;
 
-  const banners = await Banner.find(filter).sort({ sortOrder: 1, createdAt: -1 });
+  const banners = await Banner.find(filter).sort({ sortOrder: 1, createdAt: -1 }).lean();
+  const serialized = serializeBanners(banners);
 
   if (isAdmin) {
-    return apiSuccess(serializeDocuments(banners));
+    return apiSuccess(serialized);
   }
 
-  const now = new Date();
-  const activeBanners = banners.filter((banner) => {
-    if (!banner.isActive) return false;
-    if (banner.startsAt && banner.startsAt > now) return false;
-    if (banner.expiresAt && banner.expiresAt < now) return false;
-    return true;
-  });
-
-  return apiSuccess(serializeDocuments(activeBanners));
+  const activeBanners = serialized.filter((banner) => isBannerActive(banner));
+  return apiSuccess(activeBanners);
 });
 
 export const POST = withDb(async (request: Request) => {
@@ -37,8 +36,13 @@ export const POST = withDb(async (request: Request) => {
   }
 
   const banner = await Banner.create(body);
+  const serialized = serializeBanner(banner);
 
-  return apiSuccess(banner, {
+  if (!serialized) {
+    throw new ApiRouteError("Unable to serialize created banner.", 500);
+  }
+
+  return apiSuccess(serialized, {
     status: 201,
     message: "Banner created.",
   });

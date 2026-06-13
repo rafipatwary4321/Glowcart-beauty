@@ -4,6 +4,8 @@ import { HomepageSections } from "@/components/home";
 import { getSiteSettings } from "@/lib/content/settings-service";
 import { buildPageMetadata } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   return buildPageMetadata({

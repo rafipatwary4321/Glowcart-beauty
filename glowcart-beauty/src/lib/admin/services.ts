@@ -273,7 +273,8 @@ export async function fetchAdminBanners() {
     `/api/banners${ADMIN_QUERY}`,
     () => getFallbackBanners() as unknown as Record<string, unknown>[]
   );
-  return { ...result, data: result.data.map(mapApiBanner) };
+  const items = Array.isArray(result.data) ? result.data : [];
+  return { ...result, data: items.map(mapApiBanner) };
 }
 
 export async function createAdminBanner(values: BannerFormValues) {

@@ -1,4 +1,5 @@
-import { ApiRouteError, apiSuccess, serializeDocument, withDb } from "@/lib/api";
+import { ApiRouteError, apiSuccess, withDb } from "@/lib/api";
+import { serializeBanner } from "@/lib/api/banner-serializer";
 export const runtime = "nodejs";
 import { isValidObjectId } from "@/lib/db";
 import { Banner } from "@/models";
@@ -14,13 +15,18 @@ export const GET = withDb(async (_request: Request, context?: unknown) => {
     throw new ApiRouteError("Invalid banner id.", 400);
   }
 
-  const banner = await Banner.findById(id);
+  const banner = await Banner.findById(id).lean();
 
   if (!banner) {
     throw new ApiRouteError("Banner not found.", 404);
   }
 
-  return apiSuccess(serializeDocument(banner));
+  const serialized = serializeBanner(banner);
+  if (!serialized) {
+    throw new ApiRouteError("Unable to serialize banner.", 500);
+  }
+
+  return apiSuccess(serialized);
 });
 
 export const PUT = withDb(async (request: Request, context?: unknown) => {
@@ -40,7 +46,12 @@ export const PUT = withDb(async (request: Request, context?: unknown) => {
     throw new ApiRouteError("Banner not found.", 404);
   }
 
-  return apiSuccess(serializeDocument(banner), { message: "Banner updated." });
+  const serialized = serializeBanner(banner);
+  if (!serialized) {
+    throw new ApiRouteError("Unable to serialize banner.", 500);
+  }
+
+  return apiSuccess(serialized, { message: "Banner updated." });
 });
 
 export const DELETE = withDb(async (_request: Request, context?: unknown) => {
