@@ -21,6 +21,12 @@ export class HomeSectionBoundary extends Component<
     return { hasError: true };
   }
 
+  componentDidCatch(error: Error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("[HomeSectionBoundary]", error);
+    }
+  }
+
   render() {
     if (this.state.hasError) {
       return this.props.fallback ?? null;

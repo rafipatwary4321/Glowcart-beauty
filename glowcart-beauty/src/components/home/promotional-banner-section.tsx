@@ -15,12 +15,12 @@ function resolvePromotion(promotion?: Promotion): Promotion {
   const base = promotion ?? featuredPromotion;
 
   return {
-    id: base.id || featuredPromotion.id,
-    eyebrow: base.eyebrow || featuredPromotion.eyebrow,
-    title: base.title || featuredPromotion.title,
-    description: base.description || featuredPromotion.description,
-    ctaLabel: base.ctaLabel || featuredPromotion.ctaLabel,
-    ctaHref: base.ctaHref || featuredPromotion.ctaHref,
+    id: base?.id || featuredPromotion.id,
+    eyebrow: base?.eyebrow || featuredPromotion.eyebrow,
+    title: base?.title || featuredPromotion.title,
+    description: base?.description || featuredPromotion.description,
+    ctaLabel: base?.ctaLabel || featuredPromotion.ctaLabel,
+    ctaHref: base?.ctaHref || featuredPromotion.ctaHref || "/products",
   };
 }
 

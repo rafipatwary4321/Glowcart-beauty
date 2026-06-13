@@ -1,6 +1,7 @@
 import { CatalogSectionEmpty } from "@/components/catalog";
 import { SectionHeader, SkinConcernCard } from "@/components/common";
 import { PageSection } from "@/components/common/section";
+import { asArray, filterRenderable, stableItemKey } from "@/components/home/safe-section-data";
 import { getSkinConcerns } from "@/services/homepage.service";
 import type { HomeSectionProps } from "@/types";
 
@@ -8,7 +9,7 @@ export async function SkinConcernsSection({ className }: HomeSectionProps) {
   let concerns: Awaited<ReturnType<typeof getSkinConcerns>> = [];
 
   try {
-    concerns = await getSkinConcerns();
+    concerns = asArray(await getSkinConcerns());
   } catch {
     return (
       <PageSection id="skin-concerns" variant="default" className={className}>
@@ -41,8 +42,8 @@ export async function SkinConcernsSection({ className }: HomeSectionProps) {
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-          {concerns.map((concern) => (
-            <SkinConcernCard key={concern.id} data={concern} />
+          {filterRenderable(concerns).map((concern, index) => (
+            <SkinConcernCard key={stableItemKey(concern, index, "concern")} data={concern} />
           ))}
         </div>
       )}

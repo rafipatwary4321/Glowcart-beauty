@@ -1,6 +1,7 @@
 import { BrandCard, SectionHeader } from "@/components/common";
 import { CatalogSectionEmpty } from "@/components/catalog";
 import { PageSection } from "@/components/common/section";
+import { asArray, filterRenderable, stableItemKey } from "@/components/home/safe-section-data";
 import { getTopBrands } from "@/services/homepage.service";
 import { cn } from "@/lib/utils";
 import type { HomeSectionProps } from "@/types";
@@ -9,7 +10,7 @@ export async function TopBrandsSection({ className }: HomeSectionProps) {
   let brands: Awaited<ReturnType<typeof getTopBrands>> = [];
 
   try {
-    brands = await getTopBrands();
+    brands = asArray(await getTopBrands());
   } catch {
     return (
       <PageSection
@@ -50,8 +51,8 @@ export async function TopBrandsSection({ className }: HomeSectionProps) {
         />
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-6">
-          {brands.map((brand) => (
-            <BrandCard key={brand.id} data={brand} />
+          {filterRenderable(brands).map((brand, index) => (
+            <BrandCard key={stableItemKey(brand, index, "brand")} data={brand} />
           ))}
         </div>
       )}

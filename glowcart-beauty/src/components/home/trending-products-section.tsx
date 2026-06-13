@@ -2,6 +2,7 @@ import { CatalogSectionEmpty } from "@/components/catalog";
 import { SectionHeader } from "@/components/common";
 import { PageSection } from "@/components/common/section";
 import { ProductGrid } from "@/components/product";
+import { asArray } from "@/components/home/safe-section-data";
 import { getTrendingProducts } from "@/services/product.service";
 import type { HomeSectionProps } from "@/types";
 
@@ -9,7 +10,7 @@ export async function TrendingProductsSection({ className }: HomeSectionProps) {
   let products: Awaited<ReturnType<typeof getTrendingProducts>> = [];
 
   try {
-    products = await getTrendingProducts();
+    products = asArray(await getTrendingProducts()).filter((product) => Boolean(product?.id));
   } catch {
     return (
       <PageSection id="trending" variant="muted" className={className}>

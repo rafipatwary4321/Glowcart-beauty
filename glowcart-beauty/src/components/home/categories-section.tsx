@@ -1,6 +1,7 @@
 import { CategoryCard, SectionHeader } from "@/components/common";
 import { CatalogSectionEmpty } from "@/components/catalog";
 import { PageSection } from "@/components/common/section";
+import { asArray, filterRenderable, stableItemKey } from "@/components/home/safe-section-data";
 import { getFeaturedCategories } from "@/services/homepage.service";
 import type { HomeSectionProps } from "@/types";
 
@@ -8,7 +9,7 @@ export async function CategoriesSection({ className }: HomeSectionProps) {
   let categories: Awaited<ReturnType<typeof getFeaturedCategories>> = [];
 
   try {
-    categories = await getFeaturedCategories();
+    categories = asArray(await getFeaturedCategories());
   } catch {
     return (
       <PageSection id="categories" variant="white" className={className}>
@@ -39,8 +40,8 @@ export async function CategoriesSection({ className }: HomeSectionProps) {
         />
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
-          {categories.map((category) => (
-            <CategoryCard key={category.id} data={category} />
+          {filterRenderable(categories).map((category, index) => (
+            <CategoryCard key={stableItemKey(category, index, "category")} data={category} />
           ))}
         </div>
       )}
