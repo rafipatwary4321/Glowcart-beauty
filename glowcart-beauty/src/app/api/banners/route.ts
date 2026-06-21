@@ -4,17 +4,20 @@ import {
   serializeBanner,
   serializeBanners,
 } from "@/lib/api/banner-serializer";
+import { connectDB, DbConnectionError } from "@/lib/db";
 
 export const runtime = "nodejs";
 
 import { Banner } from "@/models";
 
-export const GET = withDb(async (request: Request) => {
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const isAdmin = searchParams.get("admin") === "true";
   const type = searchParams.get("type");
 
   try {
+    await connectDB();
+
     const filter: Record<string, unknown> = isAdmin ? {} : { isActive: true };
     if (type) filter.type = type;
 
@@ -28,6 +31,10 @@ export const GET = withDb(async (request: Request) => {
     const activeBanners = serialized.filter((banner) => isBannerActive(banner));
     return apiSuccess(activeBanners);
   } catch (error) {
+    if (error instanceof DbConnectionError) {
+      return apiSuccess([]);
+    }
+
     if (process.env.NODE_ENV === "development") {
       console.error("[api/banners] GET failed:", error);
     }
@@ -40,7 +47,7 @@ export const GET = withDb(async (request: Request) => {
           : undefined,
     });
   }
-});
+}
 
 export const POST = withDb(async (request: Request) => {
   const body = (await request.json()) as Record<string, unknown>;
